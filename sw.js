@@ -1,5 +1,5 @@
 // ENIGMA.IO service worker: network-first, cache fallback for offline play.
-const CACHE = 'enigma-io-v3';
+const CACHE = 'enigma-io-v4';
 const CORE = [
   './',
   './index.html',
