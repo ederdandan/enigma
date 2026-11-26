@@ -1,0 +1,2592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#060b14" />
+  <meta name="description" content="ENIGMA.IO: Arquivo Oculto — 90 enigmas investigativos com validação criptográfica SHA-256, ferramentas forenses e suporte offline PWA para GitHub Pages." />
+  <title>ENIGMA.IO: Arquivo Oculto</title>
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Enigma.io" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #060b14;
+      --bg-surface: rgba(13, 22, 38, 0.88);
+      --bg-elevated: rgba(20, 34, 58, 0.94);
+      --border-subtle: rgba(56, 189, 248, 0.28);
+      --accent-1: #38bdf8;
+      --accent-2: #f59e0b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --grid-color: rgba(56, 189, 248, 0.06);
+    }
+
+    [data-theme="dossier"] {
+      --bg-base: #191410;
+      --bg-surface: rgba(36, 29, 23, 0.9);
+      --bg-elevated: rgba(52, 42, 33, 0.95);
+      --border-subtle: rgba(239, 68, 68, 0.35);
+      --accent-1: #ef4444;
+      --accent-2: #f59e0b;
+      --text-main: #fef3c7;
+      --text-muted: #d6c5a9;
+      --grid-color: rgba(245, 158, 11, 0.05);
+    }
+
+    [data-theme="quantum"] {
+      --bg-base: #0a1622;
+      --bg-surface: rgba(16, 36, 54, 0.88);
+      --bg-elevated: rgba(24, 52, 77, 0.94);
+      --border-subtle: rgba(45, 212, 191, 0.35);
+      --accent-1: #2dd4bf;
+      --accent-2: #60a5fa;
+      --text-main: #f0fdfa;
+      --text-muted: #99f6e4;
+      --grid-color: rgba(45, 212, 191, 0.08);
+    }
+
+    [data-theme="grimoire"] {
+      --bg-base: #11091c;
+      --bg-surface: rgba(27, 15, 44, 0.9);
+      --bg-elevated: rgba(42, 23, 68, 0.94);
+      --border-subtle: rgba(232, 121, 249, 0.35);
+      --accent-1: #e879f9;
+      --accent-2: #fbbf24;
+      --text-main: #fae8ff;
+      --text-muted: #d8b4fe;
+      --grid-color: rgba(232, 121, 249, 0.07);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-base);
+      background-image:
+        linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+      background-size: 28px 28px;
+      color: var(--text-main);
+      overflow-x: hidden;
+      transition: background-color 0.35s ease, color 0.35s ease;
+    }
+
+    .font-code { font-family: 'JetBrains Mono', monospace; }
+    .font-arcane { font-family: 'Cinzel', serif; }
+
+    .glass-card {
+      background: var(--bg-surface);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 14px 36px -12px rgba(0, 0, 0, 0.65);
+    }
+
+    .btn-tactile {
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-tactile:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.08);
+    }
+    .btn-tactile:active:not(:disabled) {
+      transform: translateY(1px) scale(0.97);
+    }
+    .btn-tactile:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    /* Spectral Lens Layer Mechanics */
+    .lens-normal .stego-red { opacity: 0.035; }
+    .lens-normal .stego-cyan { opacity: 0.035; }
+    .lens-normal .stego-cover { opacity: 1; }
+
+    .lens-red .stego-cover { opacity: 0.14; }
+    .lens-red .stego-red { opacity: 1 !important; filter: drop-shadow(0 0 6px #ff2a55); }
+    .lens-red .stego-cyan { opacity: 0.035; }
+
+    .lens-cyan .stego-cover { opacity: 0.14; }
+    .lens-cyan .stego-cyan { opacity: 1 !important; filter: drop-shadow(0 0 6px #00f0ff); }
+    .lens-cyan .stego-red { opacity: 0.035; }
+
+    /* Long-Press Progress Fill on Case Badge */
+    #caseBadgeHoldBtn {
+      position: relative;
+      overflow: hidden;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #caseBadgeHoldFill {
+      position: absolute;
+      inset: 0;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(244, 63, 94, 0.55), rgba(251, 191, 36, 0.65));
+      pointer-events: none;
+      transition: width 0.05s linear;
+    }
+
+    @keyframes stickerFloat {
+      0% { transform: translate(-50%, 16px) scale(0.4) rotate(-10deg); opacity: 0; }
+      20% { transform: translate(-50%, -14px) scale(1.12) rotate(5deg); opacity: 1; }
+      80% { transform: translate(-50%, -52px) scale(1) rotate(-3deg); opacity: 1; }
+      100% { transform: translate(-50%, -95px) scale(0.88) rotate(3deg); opacity: 0; }
+    }
+    .floating-sticker {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      animation: stickerFloat 1.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.6));
+    }
+
+    @keyframes shakeError {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-7px); }
+      40%, 80% { transform: translateX(7px); }
+    }
+    .shake-box { animation: shakeError 0.38s ease-in-out; }
+
+    @keyframes radarPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.55); }
+      50% { box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); }
+    }
+    .radar-alert { animation: radarPulse 1.6s infinite; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 999px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- =========================================================
+       TOP INVESTIGATIVE TERMINAL HEADER
+       ========================================================= -->
+  <header class="sticky top-0 z-30 glass-card border-x-0 border-t-0 px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
+    <!-- Left: Agent Credential + Brand -->
+    <div class="flex items-center gap-2.5">
+      <button id="btnOpenProfile" type="button" class="group flex items-center gap-2 p-1 pr-3 rounded-full bg-black/40 hover:bg-black/60 border border-white/10 transition" title="Editar Credencial do Agente">
+        <div id="headerAvatarWrapper" class="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-slate-900 text-lg ring-2 ring-sky-400/50 transition">
+          🕵️
+        </div>
+        <div class="text-left leading-tight">
+          <div id="headerAgentName" class="text-xs sm:text-sm font-bold truncate max-w-[95px] sm:max-w-[140px]">Agente Zero</div>
+          <div class="text-[10px] opacity-75 font-code flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="headerSolvedCount">0/90 Casos</span>
+          </div>
+        </div>
+      </button>
+
+      <div class="flex flex-col pl-2 border-l border-white/10 select-none">
+        <div class="flex items-center gap-1.5">
+          <img src="icons/icon.svg" alt="" class="w-5 h-5 sm:w-6 sm:h-6" />
+          <span class="font-code font-extrabold text-sm sm:text-base tracking-wider bg-gradient-to-r from-sky-300 via-cyan-200 to-amber-300 bg-clip-text text-transparent">
+            ENIGMA.IO
+          </span>
+        </div>
+        <span class="text-[9px] uppercase tracking-widest opacity-60 hidden sm:inline">SHA-256 Vault • PWA</span>
+      </div>
+    </div>
+
+    <!-- Center: 90-Case Directory Selector -->
+    <div class="flex items-center gap-1.5">
+      <button id="btnOpenCases" type="button" class="btn-tactile px-3 sm:px-4 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 flex items-center gap-2 text-xs sm:text-sm font-bold">
+        <span id="headerTierBadge" class="px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Iniciado</span>
+        <span id="headerCaseTitle" class="font-code">Caso 01/90</span>
+        <span class="opacity-60 text-xs">▼</span>
+      </button>
+    </div>
+
+    <!-- Right: Coins, Shop, Theme Selector & Sound -->
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <button id="btnOpenShop" type="button" class="btn-tactile flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/35 text-amber-300 font-bold text-xs sm:text-sm" title="Loja Forense & Temas">
+        <span>🪙</span>
+        <span id="headerCoins" class="font-code">100</span>
+        <span class="hidden md:inline text-[10px] uppercase bg-amber-400/20 px-1.5 py-0.5 rounded-full">Loja</span>
+      </button>
+
+      <div class="relative">
+        <select id="themeSelect" aria-label="Tema Visual" class="appearance-none bg-black/40 hover:bg-black/60 border border-white/15 rounded-xl pl-2.5 pr-6 py-1.5 text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-400">
+          <option value="noir">🌃 Noir Cibernético</option>
+          <option value="dossier">📁 Arquivo Confidencial</option>
+          <option value="quantum">💠 Lab Quântico</option>
+          <option value="grimoire">🔮 Grimório Arcano</option>
+        </select>
+        <span class="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] opacity-70">🎨</span>
+      </div>
+
+      <button id="btnToggleSound" type="button" class="btn-tactile w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 flex items-center justify-center text-sm" title="Ligar/Desligar Som" aria-label="Ligar ou desligar som">🔊</button>
+
+      <button id="btnOpenHelp" type="button" class="btn-tactile w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/40 text-sky-200 flex items-center justify-center text-sm font-extrabold" title="Como Jogar" aria-label="Como jogar">?</button>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       MAIN WORKSPACE: EVIDENCE VIEWPORT + FORENSIC DECK
+       ========================================================= -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-2.5 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
+
+    <!-- LEFT COLUMN: INTERACTIVE URL BAR + VISUAL EVIDENCE BOARD -->
+    <section class="lg:col-span-7 flex flex-col gap-3">
+      <div class="glass-card rounded-2xl p-3 sm:p-4 flex flex-col flex-1 justify-between gap-3">
+
+        <!-- Interactive Browser-Style URL Bar -->
+        <div class="flex items-center gap-1.5 bg-black/55 border border-white/15 rounded-xl px-2.5 py-1.5 focus-within:border-sky-400 transition">
+          <span class="text-xs opacity-60 select-none">🔒 https://</span>
+          <input id="virtualUrlInput" type="text" spellcheck="false" autocomplete="off" class="flex-1 bg-transparent font-code text-xs sm:text-sm text-sky-300 focus:outline-none min-w-0" value="enigma.io/caso/01/inicio" aria-label="Barra de endereço do enigma" />
+          <button id="btnGoUrl" type="button" class="btn-tactile px-2.5 py-1 rounded-lg bg-sky-500/25 hover:bg-sky-500/40 border border-sky-400/40 text-sky-200 font-code text-[11px] font-bold shrink-0">
+            IR ↵
+          </button>
+        </div>
+
+        <!-- Case Header Metadata (Long-Press on #caseBadgeHoldBtn reveals ONLY current case solution) -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="caseBadgeHoldBtn" type="button" class="px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-400/40 text-sky-300 font-code text-xs font-extrabold cursor-default transition" title="Número do caso">
+                <span id="caseBadgeHoldFill"></span>
+                <span id="caseCodeTag" class="relative z-10">CASO #01</span>
+              </button>
+              <span id="caseCategoryTag" class="text-[11px] font-semibold opacity-75">Lógica Visual</span>
+              <span id="radarBadge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/25 text-amber-300 border border-amber-400/40 radar-alert">📡 Radar Ativo</span>
+            </div>
+            <h1 id="caseTitle" class="text-lg sm:text-xl font-extrabold mt-1 tracking-tight">O Despertar do Arquivo</h1>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button id="btnPrevCase" type="button" class="btn-tactile w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 font-bold text-xs" title="Caso Anterior">◀</button>
+            <button id="btnNextCaseNav" type="button" class="btn-tactile w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 font-bold text-xs" title="Próximo Caso">▶</button>
+          </div>
+        </div>
+
+        <!-- Dynamic SVG Evidence Canvas Container -->
+        <div id="evidenceViewport" class="lens-normal relative rounded-2xl bg-slate-950/85 border border-white/15 overflow-hidden flex items-center justify-center min-h-[225px] sm:min-h-[280px] p-3 select-none">
+          <div id="spectralOverlay" class="pointer-events-none absolute inset-0 transition-colors duration-300 z-10"></div>
+          <div id="svgEvidenceContainer" class="w-full h-full flex items-center justify-center z-0"></div>
+          <div id="lensStatusPill" class="hidden absolute top-2.5 right-2.5 z-20 px-2.5 py-1 rounded-full bg-black/75 border border-white/20 font-code text-[10px] font-bold">
+            LENTE: NORMAL
+          </div>
+        </div>
+
+        <!-- Case Narrative / Clue Prompt -->
+        <div class="p-3 rounded-xl bg-black/35 border border-white/10">
+          <p id="casePrompt" class="text-xs sm:text-sm leading-relaxed opacity-95"></p>
+          <p id="caseSubNote" class="font-code text-[11px] text-amber-300/90 mt-1.5"></p>
+          <p id="morseTranscript" class="hidden font-code text-xs text-amber-200 mt-1.5 p-2 rounded-lg bg-amber-500/10 border border-amber-400/30 break-words"></p>
+        </div>
+
+        <!-- Forensic Toolbar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+          <button id="btnToolLens" type="button" class="btn-tactile py-2 px-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/35 text-rose-200 text-xs font-bold flex items-center justify-center gap-1.5">
+            <span>👓</span> <span id="lblToolLens">Lente: Normal</span>
+          </button>
+
+          <button id="btnToolSource" type="button" class="btn-tactile py-2 px-2.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/35 text-sky-200 text-xs font-bold flex items-center justify-center gap-1.5">
+            <span>&lt;/&gt;</span> <span>Código-Fonte</span>
+          </button>
+
+          <button id="btnToolAudio" type="button" class="btn-tactile py-2 px-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/35 text-amber-200 text-xs font-bold flex items-center justify-center gap-1.5">
+            <span>📡</span> <span id="lblToolAudio">Sinal Áudio</span>
+          </button>
+
+          <button id="btnToolNotes" type="button" class="btn-tactile py-2 px-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/35 text-emerald-200 text-xs font-bold flex items-center justify-center gap-1.5">
+            <span>📝</span> <span>Notas</span>
+          </button>
+        </div>
+
+        <!-- Collapsible Scratchpad Drawer -->
+        <div id="scratchpadDrawer" class="hidden p-2.5 rounded-xl bg-black/55 border border-emerald-400/30">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-code text-[10px] uppercase tracking-wider text-emerald-300 font-bold">Bloco de Notas do Agente (Salvo Automaticamente)</span>
+            <button id="btnClearNotes" type="button" class="text-[10px] text-rose-300 hover:underline">Limpar</button>
+          </div>
+          <textarea id="scratchpadInput" rows="2" placeholder="Anote sequências, traduções Morse, letras ou cálculos aqui..." class="w-full bg-transparent font-code text-xs text-slate-200 focus:outline-none resize-none"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: SHA-256 ANSWER VALIDATOR, 3-TIER HINTS & STICKERS -->
+    <section class="lg:col-span-5 flex flex-col gap-3">
+      <div class="glass-card rounded-2xl p-3.5 sm:p-4 flex flex-col justify-between flex-1 gap-3.5">
+
+        <!-- 1. SHA-256 Cryptographic Answer Box -->
+        <div id="answerCardBox" class="p-3.5 rounded-2xl bg-black/40 border border-white/15">
+          <div class="flex items-center justify-between mb-2">
+            <label for="answerInput" class="font-code text-xs font-bold uppercase tracking-wider text-sky-300 flex items-center gap-1.5">
+              <span>🔐</span> <span>Chave SHA-256</span>
+            </label>
+            <span id="solvedBadgePill" class="hidden px-2 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 font-code text-[10px] font-bold">
+              ✓ DECIFRADO
+            </span>
+          </div>
+
+          <form id="answerForm" class="flex gap-2">
+            <input id="answerInput" type="text" autocomplete="off" spellcheck="false" placeholder="Digite a resposta..." class="flex-1 min-w-0 px-3.5 py-2.5 rounded-xl bg-slate-950/90 border border-white/20 focus:border-sky-400 focus:outline-none font-code text-base sm:text-sm font-bold tracking-wider uppercase" enterkeyhint="go" autocapitalize="characters" />
+            <button id="btnSubmitAnswer" type="submit" class="btn-tactile px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-400 to-cyan-300 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-sky-500/20 shrink-0">
+              VALIDAR
+            </button>
+          </form>
+
+          <!-- Live Hash Verification Telemetry -->
+          <div id="hashTelemetryLine" class="mt-2 font-code text-[10px] opacity-60 truncate">
+            HASH ALVO: <span id="targetHashPreview">carregando...</span>
+          </div>
+
+          <!-- Feedback Message Banner -->
+          <div id="feedbackMsg" class="hidden mt-2.5 px-3 py-2 rounded-xl text-xs font-semibold"></div>
+        </div>
+
+        <!-- 2. Progressive 3-Tier Hint System -->
+        <div class="p-3.5 rounded-2xl bg-black/35 border border-white/10 flex-1 flex flex-col justify-between gap-2.5">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-code text-xs font-bold uppercase tracking-wider text-amber-300">💡 Central de Dicas (3 Níveis)</span>
+              <span id="discountTag" class="hidden text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">-20% VIP</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-1.5 mb-2.5">
+              <button id="btnHint1" type="button" class="btn-tactile p-2 rounded-xl bg-white/10 hover:bg-amber-500/20 border border-white/15 flex flex-col items-center text-center">
+                <span class="text-xs font-bold">1. Sussurro</span>
+                <span id="costHint1" class="font-code text-[10px] text-amber-300 mt-0.5">10 🪙</span>
+              </button>
+
+              <button id="btnHint2" type="button" class="btn-tactile p-2 rounded-xl bg-white/10 hover:bg-amber-500/20 border border-white/15 flex flex-col items-center text-center">
+                <span class="text-xs font-bold">2. Pista Direta</span>
+                <span id="costHint2" class="font-code text-[10px] text-amber-300 mt-0.5">25 🪙</span>
+              </button>
+
+              <button id="btnHint3" type="button" class="btn-tactile p-2 rounded-xl bg-white/10 hover:bg-rose-500/20 border border-white/15 flex flex-col items-center text-center">
+                <span class="text-xs font-bold">3. Letras</span>
+                <span id="costHint3" class="font-code text-[10px] text-rose-300 mt-0.5">50 🪙</span>
+              </button>
+            </div>
+
+            <!-- Unlocked Hints Display Feed -->
+            <div id="hintsFeed" class="space-y-1.5 max-h-36 overflow-y-auto pr-1 text-xs">
+              <div class="p-2.5 rounded-xl bg-white/5 border border-white/10 opacity-65 italic">
+                Nenhuma dica desbloqueada para este arquivo ainda.
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] opacity-75">
+            <span>Acentos e maiúsculas não importam</span>
+            <button id="btnOpenCipherTable" type="button" class="text-sky-300 hover:underline font-bold">📖 Tabela Morse / A=1</button>
+          </div>
+        </div>
+
+        <!-- 3. Interactive Stickers Bar -->
+        <div class="p-2.5 rounded-2xl bg-black/35 border border-white/10">
+          <div class="text-[10px] uppercase tracking-wider opacity-65 font-bold mb-1.5">Reações do Agente (Stickers):</div>
+          <div class="grid grid-cols-5 gap-1.5">
+            <button type="button" data-sticker="🧠 Mente Explodindo!" class="sticker-trigger btn-tactile py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold flex flex-col items-center">
+              <span class="text-base">🧠</span><span class="text-[9px]">Gênio</span>
+            </button>
+            <button type="button" data-sticker="🕵️ Elemental, meu caro!" class="sticker-trigger btn-tactile py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold flex flex-col items-center">
+              <span class="text-base">🕵️</span><span class="text-[9px]">Pista!</span>
+            </button>
+            <button type="button" data-sticker="🤯 Que Enigma Insano!" class="sticker-trigger btn-tactile py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold flex flex-col items-center">
+              <span class="text-base">🤯</span><span class="text-[9px]">Buguei</span>
+            </button>
+            <button type="button" data-sticker="🔥 Decifrado com Estilo!" class="sticker-trigger btn-tactile py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold flex flex-col items-center">
+              <span class="text-base">🔥</span><span class="text-[9px]">Fogo</span>
+            </button>
+            <button type="button" data-sticker="☕ Mais Café, Por Favor!" class="sticker-trigger btn-tactile py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold flex flex-col items-center">
+              <span class="text-base">☕</span><span class="text-[9px]">Café</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       MODAL 1: LOCAL LOGIN & AGENT CREDENTIAL (CAMERA / GALLERY / SVG)
+       ========================================================= -->
+  <div id="profileModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3">
+    <div class="glass-card rounded-3xl max-w-md w-full p-5 sm:p-6 border border-sky-400/40 shadow-2xl max-h-[94vh] overflow-y-auto">
+      <div class="text-center mb-4">
+        <span class="inline-block px-3 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-code text-[11px] font-bold uppercase tracking-wider mb-1">
+          Credencial Local • Offline PWA
+        </span>
+        <h2 class="text-xl sm:text-2xl font-extrabold">ENIGMA.IO: Arquivo Oculto</h2>
+        <p class="text-xs opacity-75 mt-1">Configure sua identificação de agente para salvar seu progresso nos 90 casos.</p>
+      </div>
+
+      <!-- Avatar Preview -->
+      <div class="flex flex-col items-center mb-4">
+        <div id="profileAvatarPreview" class="w-24 h-24 rounded-full overflow-hidden bg-slate-900 flex items-center justify-center text-4xl shadow-xl ring-4 ring-sky-400/50 relative">
+          <span id="profileEmojiPreview">🕵️</span>
+          <img id="profileImgPreview" class="hidden w-full h-full object-cover" alt="Foto do Agente" />
+          <video id="profileCameraVideo" class="hidden w-full h-full object-cover scale-x-[-1]" autoplay playsinline muted></video>
+        </div>
+
+        <div id="profileCameraControls" class="hidden mt-2.5 flex items-center gap-2">
+          <button id="btnSnapCamera" type="button" class="btn-tactile px-3.5 py-1.5 rounded-full bg-emerald-400 text-slate-950 font-extrabold text-xs">
+            📸 Capturar Foto
+          </button>
+          <button id="btnStopCamera" type="button" class="btn-tactile px-3 py-1.5 rounded-full bg-white/15 text-xs font-bold">
+            Cancelar
+          </button>
+        </div>
+      </div>
+
+      <!-- Avatar Source Selector -->
+      <div class="grid grid-cols-3 gap-2 mb-3">
+        <button id="btnTabAvatars" type="button" class="btn-tactile py-2 px-2 rounded-xl bg-sky-500/25 border border-sky-400/50 text-xs font-bold flex items-center justify-center gap-1.5">
+          <span>🎭</span> Avatares
+        </button>
+        <button id="btnTabCamera" type="button" class="btn-tactile py-2 px-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold flex items-center justify-center gap-1.5">
+          <span>📷</span> Câmera
+        </button>
+        <label class="btn-tactile py-2 px-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>🖼️</span> Galeria
+          <input id="inputGalleryUpload" type="file" accept="image/*" class="hidden" />
+        </label>
+      </div>
+
+      <!-- 8 Investigative Avatars -->
+      <div id="avatarPresetsGrid" class="grid grid-cols-4 gap-2 mb-3 p-2.5 rounded-2xl bg-black/40 border border-white/10">
+        <button type="button" data-avatar="🕵️" class="avatar-preset-btn p-2 rounded-xl bg-white/10 hover:bg-sky-500/30 text-2xl transition">🕵️</button>
+        <button type="button" data-avatar="🦊" class="avatar-preset-btn p-2 rounded-xl bg-white/10 hover:bg-sky-500/30 text-2xl transition">🦊</button>
+        <button type="button" data-avatar="🦉" class="avatar-preset-btn p-2 rounded-xl bg-white/10 hover:bg-sky-500/30 text-2xl transition">🦉</button>
+        <button type="button" data-avatar="🧬" class="avatar-preset-btn p-2 rounded-xl bg-white/10 hover:bg-sky-500/30 text-2xl transition">🧬</button>
+        <button type="button" data-avatar="👁️" class="avatar-preset-btn p-2 rounded-xl bg-white/10 hover:bg-sky-500/30 text-2xl transition">👁️</button>
+        <button type="button" data-avatar="🗝️" class="avatar-preset-btn p-2 rounded-xl bg-white/10 hover:bg-sky-500/30 text-2xl transition">🗝️</button>
+        <button type="button" data-avatar="🛰️" class="avatar-preset-btn p-2 rounded-xl bg-white/10 hover:bg-sky-500/30 text-2xl transition">🛰️</button>
+        <button type="button" data-avatar="🔮" class="avatar-preset-btn p-2 rounded-xl bg-white/10 hover:bg-sky-500/30 text-2xl transition">🔮</button>
+      </div>
+
+      <p id="cameraStatusError" class="hidden text-xs text-amber-300 bg-amber-500/15 border border-amber-400/30 rounded-xl p-2 mb-3 text-center"></p>
+
+      <div class="mb-4">
+        <label for="inputAgentName" class="block font-code text-[11px] font-bold uppercase tracking-wider opacity-75 mb-1">Codinome do Agente:</label>
+        <input id="inputAgentName" type="text" maxlength="20" placeholder="Ex: CipherHunter" class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/20 focus:border-sky-400 focus:outline-none text-sm font-bold" />
+      </div>
+
+      <button id="btnConfirmProfile" type="button" class="btn-tactile w-full py-3 rounded-xl bg-gradient-to-r from-sky-400 to-cyan-300 text-slate-950 font-extrabold text-sm shadow-lg">
+        🔓 Acessar Terminal de Casos
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 2: 90-CASE GRID DIRECTORY
+       ========================================================= -->
+  <div id="casesModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4">
+    <div class="glass-card rounded-3xl max-w-3xl w-full p-4 sm:p-6 border border-white/20 shadow-2xl max-h-[92vh] flex flex-col">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-white/10">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-extrabold">Diretório dos 90 Arquivos</h2>
+          <p id="casesProgressSummary" class="text-xs opacity-75 font-code">Progresso Total: 0/90 decifrados</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btnJumpUnsolved" type="button" class="btn-tactile px-3 py-1.5 rounded-xl bg-sky-500/25 hover:bg-sky-500/35 border border-sky-400/40 text-sky-200 text-xs font-bold">
+            ▶ Próximo Pendente
+          </button>
+          <button id="btnCloseCases" type="button" class="btn-tactile w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold">✕</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 my-3">
+        <button type="button" data-tier-tab="Iniciado" class="tier-tab-btn btn-tactile py-2 rounded-xl font-bold text-xs sm:text-sm border">
+          🟢 Iniciado (1–30)
+        </button>
+        <button type="button" data-tier-tab="Decifrador" class="tier-tab-btn btn-tactile py-2 rounded-xl font-bold text-xs sm:text-sm border">
+          🟡 Decifrador (31–60)
+        </button>
+        <button type="button" data-tier-tab="Mestre" class="tier-tab-btn btn-tactile py-2 rounded-xl font-bold text-xs sm:text-sm border">
+          🔴 Mestre (61–90)
+        </button>
+      </div>
+
+      <div id="casesGridContainer" class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-2 overflow-y-auto pr-1 flex-1 py-1"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 3: VIEW SOURCE & EXIF INSPECTOR
+       ========================================================= -->
+  <div id="sourceModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3">
+    <div class="glass-card rounded-3xl max-w-2xl w-full p-4 sm:p-6 border border-sky-400/40 shadow-2xl max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-code text-xs font-bold">&lt;/&gt; VIEW-SOURCE</span>
+          <h3 id="sourceModalTitle" class="font-bold text-base sm:text-lg">Inspeção de Código & Metadados</h3>
+        </div>
+        <button id="btnCloseSource" type="button" class="btn-tactile w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <div class="my-3 flex-1 overflow-y-auto rounded-2xl bg-slate-950 border border-white/15 p-3.5 font-code text-xs leading-relaxed text-emerald-300">
+        <pre id="sourceCodeContent" class="whitespace-pre-wrap"></pre>
+      </div>
+
+      <p class="text-[11px] opacity-70">Dica forense: leia atentamente os comentários HTML (<code>&lt;!-- ... --&gt;</code>) e os metadados da evidência acima.</p>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 4: FORENSIC SHOP
+       ========================================================= -->
+  <div id="shopModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3">
+    <div class="glass-card rounded-3xl max-w-2xl w-full p-4 sm:p-6 border border-amber-400/40 shadow-2xl max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-extrabold">Arsenal & Loja Forense</h2>
+          <p class="text-xs opacity-75">Invista suas moedas em equipamentos permanentes e molduras de agente.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 font-code font-bold text-xs">
+            🪙 <span id="shopCoinsDisplay">0</span>
+          </span>
+          <button id="btnCloseShop" type="button" class="btn-tactile w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold">✕</button>
+        </div>
+      </div>
+
+      <div id="shopItemsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto py-3 pr-1 flex-1"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 5: CIPHER REFERENCE CHEATSHEET
+       ========================================================= -->
+  <div id="cipherModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3">
+    <div class="glass-card rounded-3xl max-w-xl w-full p-5 border border-sky-400/35 shadow-2xl max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between pb-2.5 border-b border-white/10">
+        <h3 class="font-bold text-lg">📖 Guia Rápido de Decodificação</h3>
+        <button id="btnCloseCipher" type="button" class="btn-tactile w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center font-bold">✕</button>
+      </div>
+      <div class="overflow-y-auto py-3 space-y-3 font-code text-xs">
+        <div class="p-3 rounded-xl bg-black/40 border border-white/10">
+          <div class="text-sky-300 font-bold mb-1">Alfabeto Numérico (A=1 ... Z=26)</div>
+          <div class="opacity-85 leading-relaxed">A=1 B=2 C=3 D=4 E=5 F=6 G=7 H=8 I=9 J=10 K=11 L=12 M=13 N=14 O=15 P=16 Q=17 R=18 S=19 T=20 U=21 V=22 W=23 X=24 Y=25 Z=26</div>
+        </div>
+        <div class="p-3 rounded-xl bg-black/40 border border-white/10">
+          <div class="text-amber-300 font-bold mb-1">Código Morse Internacional</div>
+          <div class="grid grid-cols-3 sm:grid-cols-4 gap-1 opacity-90">
+            <span>A: .-</span><span>B: -...</span><span>C: -.-.</span><span>D: -..</span>
+            <span>E: .</span><span>F: ..-.</span><span>G: --.</span><span>H: ....</span>
+            <span>I: ..</span><span>J: .---</span><span>K: -.-</span><span>L: .-..</span>
+            <span>M: --</span><span>N: -.</span><span>O: ---</span><span>P: .--.</span>
+            <span>Q: --.-</span><span>R: .-.</span><span>S: ...</span><span>T: -</span>
+            <span>U: ..-</span><span>V: ...-</span><span>W: .--</span><span>X: -..-</span>
+            <span>Y: -.--</span><span>Z: --..</span><span>0: -----</span><span>1: .----</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 6: CASE SOLVED CELEBRATION
+       ========================================================= -->
+  <div id="solvedModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl max-w-md w-full p-6 border-2 border-emerald-400/60 text-center shadow-2xl">
+      <div class="text-5xl mb-2">🔓</div>
+      <span class="inline-block px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-code text-xs font-bold uppercase tracking-wider">
+        Hash SHA-256 Autenticado!
+      </span>
+      <h2 id="solvedModalTitle" class="text-2xl font-extrabold mt-2">Caso Decifrado!</h2>
+      <p id="solvedModalExplanation" class="text-xs opacity-85 mt-1.5 leading-relaxed"></p>
+
+      <div class="my-4 p-3 rounded-2xl bg-black/45 border border-amber-400/35">
+        <div class="text-xs opacity-70">Recompensa Recebida</div>
+        <div id="solvedRewardCoins" class="font-code text-2xl font-extrabold text-amber-300 mt-0.5">+30 🪙</div>
+      </div>
+
+      <button id="btnProceedNextCase" type="button" class="btn-tactile w-full py-3 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-300 text-slate-950 font-extrabold text-sm shadow-lg">
+        Próximo Arquivo ➔
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 7: CURRENT-RIDDLE VALIDATION VAULT (LONG-PRESS ON CASE BADGE)
+       Strictly reveals ONLY the active case + exports hardened production HTML
+       ========================================================= -->
+  <div id="singleCaseDebugModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl max-w-md w-full p-5 border-2 border-rose-500/60 shadow-2xl">
+      <div class="flex items-center justify-between pb-2.5 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-rose-500/25 text-rose-300 font-code text-[10px] font-bold">VALIDAÇÃO INDIVIDUAL</span>
+          <h3 class="font-bold text-base">Solução do Enigma Atual</h3>
+        </div>
+        <button id="btnCloseSingleDebug" type="button" class="btn-tactile w-8 h-8 rounded-xl bg-white/10 font-bold">✕</button>
+      </div>
+
+      <div class="my-3.5 space-y-2.5 text-xs">
+        <div class="p-3 rounded-xl bg-black/50 border border-white/10">
+          <div class="opacity-65 font-code text-[10px] uppercase">Enigma Aberto:</div>
+          <div id="debugSingleCaseLabel" class="font-bold text-sm mt-0.5">#01</div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/40">
+          <div class="text-emerald-300 font-code text-[10px] uppercase font-bold">Resposta Exata deste Caso:</div>
+          <div id="debugSingleAnswer" class="font-code text-lg font-extrabold text-white mt-0.5 select-all">---</div>
+          <div id="debugSingleUrlHint" class="font-code text-[11px] text-sky-300 mt-1"></div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-black/40 border border-white/10">
+          <div class="opacity-65 font-code text-[10px] uppercase">Raciocínio / Método:</div>
+          <p id="debugSingleMethod" class="mt-1 leading-relaxed opacity-90"></p>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-slate-950/80 border border-white/10 font-code text-[10px] opacity-75 break-all">
+          <span class="text-sky-400 font-bold">SHA-256:</span> <span id="debugSingleHash">...</span>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <button id="btnDebugFillCurrent" type="button" class="btn-tactile w-full py-2.5 px-3 rounded-xl bg-sky-500/25 hover:bg-sky-500/40 border border-sky-400/40 text-sky-200 font-bold text-xs">
+          ✍️ Preencher Resposta deste Caso
+        </button>
+
+        <button id="btnExportHardenedHtml" type="button" class="btn-tactile w-full py-2.5 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/40 text-amber-200 font-bold text-xs" title="Gera o index.html final para GitHub Pages removendo este painel e qualquer texto de resposta">
+          📦 Baixar Versão Final Blindada (GitHub Pages)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 8: HOW TO PLAY (ONBOARDING)
+       ========================================================= -->
+  <div id="helpModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3">
+    <div class="glass-card rounded-3xl max-w-lg w-full p-5 sm:p-6 border border-sky-400/40 shadow-2xl max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between pb-2.5 border-b border-white/10">
+        <h2 class="font-extrabold text-lg sm:text-xl">❓ Como Jogar</h2>
+        <button id="btnCloseHelp" type="button" class="btn-tactile w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 font-bold" aria-label="Fechar">✕</button>
+      </div>
+      <ol class="overflow-y-auto py-3 space-y-2.5 text-sm leading-relaxed">
+        <li class="p-3 rounded-xl bg-black/40 border border-white/10"><strong>1. Observe a evidência.</strong> Cada caso tem uma imagem e um texto com a pista. A resposta é sempre <strong>uma palavra</strong>.</li>
+        <li class="p-3 rounded-xl bg-black/40 border border-white/10"><strong>2. Use as ferramentas abaixo da imagem:</strong>
+          <ul class="mt-1 space-y-1 text-xs opacity-90">
+            <li>👓 <strong>Lente</strong>: cada toque troca o filtro (Normal → Vermelha → Ciana) e revela textos escondidos.</li>
+            <li>&lt;/&gt; <strong>Código-Fonte</strong>: mostra anotações escondidas do arquivo.</li>
+            <li>📡 <strong>Sinal Áudio</strong>: toca uma mensagem em Código Morse. O código também aparece escrito.</li>
+            <li>📝 <strong>Notas</strong>: rascunho salvo automaticamente para cada caso.</li>
+          </ul>
+        </li>
+        <li class="p-3 rounded-xl bg-black/40 border border-white/10"><strong>3. Barra de endereço.</strong> Em alguns casos você resolve trocando a última palavra do endereço (ex: <span class="font-code text-sky-300">/dia</span> → <span class="font-code text-sky-300">/noite</span>) e tocando em <strong>IR</strong>.</li>
+        <li class="p-3 rounded-xl bg-black/40 border border-white/10"><strong>4. Responda.</strong> Digite a palavra no campo 🔐 e toque em <strong>VALIDAR</strong> (ou Enter). Acentos e maiúsculas não importam.</li>
+        <li class="p-3 rounded-xl bg-black/40 border border-white/10"><strong>5. Travou?</strong> Compre uma das 3 dicas com moedas 🪙. Cada caso resolvido dá moedas, que também servem na Loja. A <strong>📖 Tabela Morse / A=1</strong> ajuda nas cifras.</li>
+        <li class="p-3 rounded-xl bg-black/40 border border-white/10"><strong>6. Navegue.</strong> Use ◀ ▶ ou o botão <strong>Caso 01/90</strong> no topo para escolher qualquer caso. Seu progresso fica salvo neste aparelho.</li>
+      </ol>
+      <button id="btnHelpStart" type="button" class="btn-tactile w-full py-3 rounded-xl bg-gradient-to-r from-sky-400 to-cyan-300 text-slate-950 font-extrabold text-sm shadow-lg">
+        Entendi, vamos jogar!
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * ENIGMA.IO: Arquivo Oculto — Real SHA-256 Cryptographic Validation Engine
+     * Single-File PWA Ready for GitHub Pages
+     * ============================================================================
+     */
+
+    // 1. PWA SERVICE WORKER (manifest + icons are static files: manifest.webmanifest, icons/)
+    // Browsers reject service workers and manifests served from blob: URLs, so real files are used.
+    (function registerPWA() {
+      if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
+        });
+      }
+    })();
+
+    // Dev-only tools (long-press answer reveal + hardened export). Enable by opening the page with ?dev=1
+    const DEV_MODE = new URLSearchParams(location.search).get('dev') === '1';
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // 2. REAL WEB CRYPTO SHA-256 ENGINE (WITH DETERMINISTIC FALLBACK FOR NON-HTTPS FILE://)
+    const CryptoVault = (() => {
+      const GLOBAL_SALT = 'ENIGMA_IO_2026_SALT_V2';
+
+      function normalizeInput(str) {
+        return (str || '')
+          .toString()
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9/._-]/g, '');
+      }
+
+      // Pure JS SHA-256 fallback in case file:// runs in a restricted context without crypto.subtle
+      function sha256Fallback(ascii) {
+        function rightRotate(value, amount) {
+          return (value >>> amount) | (value << (32 - amount));
+        }
+        const mathPow = Math.pow;
+        const maxWord = mathPow(2, 32);
+        let result = '';
+        const words = [];
+        const asciiBitLength = ascii.length * 8;
+        const hash = [];
+        const k = [];
+        let primeCounter = 0;
+        const isComposite = {};
+        for (let candidate = 2; primeCounter < 64; candidate++) {
+          if (!isComposite[candidate]) {
+            for (let i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+            hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+            k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+          }
+        }
+        ascii += '\x80';
+        while ((ascii.length % 64) - 56) ascii += '\x00';
+        for (let i = 0; i < ascii.length; i++) {
+          const j = ascii.charCodeAt(i);
+          words[i >> 2] |= j << (((3 - i) % 4) * 8);
+        }
+        words[words.length] = (asciiBitLength / maxWord) | 0;
+        words[words.length] = asciiBitLength;
+
+        for (let j = 0; j < words.length; ) {
+          const w = words.slice(j, (j += 16));
+          const oldHash = hash.slice(0);
+          for (let i = 0; i < 64; i++) {
+            const w15 = w[i - 15], w2 = w[i - 2];
+            const a = hash[0], e = hash[4];
+            const temp1 =
+              hash[7] +
+              (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) +
+              ((e & hash[5]) ^ (~e & hash[6])) +
+              k[i] +
+              (w[i] =
+                i < 16
+                  ? w[i]
+                  : (w[i - 16] +
+                      (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) +
+                      w[i - 7] +
+                      (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) |
+                    0);
+            const temp2 =
+              (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) +
+              ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+            hash.unshift((temp1 + temp2) | 0);
+            hash[4] = (hash[4] + temp1) | 0;
+            hash.pop();
+          }
+          for (let i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+        }
+        for (let i = 0; i < 8; i++) {
+          for (let j = 3; j + 1; j--) {
+            const b = (hash[i] >> (j * 8)) & 255;
+            result += (b < 16 ? '0' : '') + b.toString(16);
+          }
+        }
+        return result;
+      }
+
+      async function computeSaltedHash(caseId, candidatePlain) {
+        const clean = normalizeInput(candidatePlain);
+        const payload = `${GLOBAL_SALT}:C${String(caseId).padStart(3, '0')}:${clean}`;
+        try {
+          if (window.crypto && window.crypto.subtle) {
+            const data = new TextEncoder().encode(payload);
+            const digest = await window.crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(digest))
+              .map(b => b.toString(16).padStart(2, '0'))
+              .join('');
+          }
+        } catch (e) {}
+        return sha256Fallback(payload);
+      }
+
+      function computeSyncHash(caseId, candidatePlain) {
+        const clean = normalizeInput(candidatePlain);
+        const payload = `${GLOBAL_SALT}:C${String(caseId).padStart(3, '0')}:${clean}`;
+        return sha256Fallback(payload);
+      }
+
+      return { normalizeInput, computeSaltedHash, computeSyncHash };
+    })();
+
+    // 3. WEB AUDIO SYNTHESIZER (UI SFX + MORSE CODE PLAYER)
+    const AudioEngine = (() => {
+      let ctx = null;
+      let muted = false;
+      let activeTimers = [];
+      let morseNodes = [];
+
+      function getCtx() {
+        if (!ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) ctx = new AC();
+        }
+        if (ctx && ctx.state === 'suspended') ctx.resume();
+        return ctx;
+      }
+
+      function tone(freq, type = 'sine', dur = 0.12, vol = 0.12, delay = 0, track = false) {
+        if (muted) return;
+        try {
+          const c = getCtx();
+          if (!c) return;
+          const osc = c.createOscillator();
+          const g = c.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, c.currentTime + delay);
+          g.gain.setValueAtTime(0.001, c.currentTime + delay);
+          g.gain.exponentialRampToValueAtTime(vol, c.currentTime + delay + 0.012);
+          g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + delay + dur);
+          osc.connect(g);
+          g.connect(c.destination);
+          osc.start(c.currentTime + delay);
+          osc.stop(c.currentTime + delay + dur + 0.02);
+          if (track) morseNodes.push(osc);
+        } catch (e) {}
+      }
+
+      const MORSE_MAP = {
+        A: '.-', B: '-...', C: '-.-.', D: '-..', E: '.', F: '..-.', G: '--.', H: '....',
+        I: '..', J: '.---', K: '-.-', L: '.-..', M: '--', N: '-.', O: '---', P: '.--.',
+        Q: '--.-', R: '.-.', S: '...', T: '-', U: '..-', V: '...-', W: '.--', X: '-..-',
+        Y: '-.--', Z: '--..', '0': '-----', '1': '.----', '2': '..---', '3': '...--',
+        '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.'
+      };
+
+      function stopMorse() {
+        activeTimers.forEach(t => clearTimeout(t));
+        activeTimers = [];
+        // Stop tones already scheduled in the audio graph so replays never overlap
+        morseNodes.forEach(o => { try { o.stop(); } catch (e) {} });
+        morseNodes = [];
+      }
+
+      function toMorseText(word) {
+        return word.toUpperCase().replace(/[^A-Z0-9]/g, '').split('').map(ch => MORSE_MAP[ch] || '').join('  /  ');
+      }
+
+      // Plays the word as audio (unless muted) and always drives the visual pulse callback,
+      // so the puzzle stays solvable without sound.
+      function playMorseWord(word, onPulse) {
+        stopMorse();
+        const clean = word.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        let t = 0.05;
+        const dot = 0.11;
+        const dash = 0.31;
+
+        for (let i = 0; i < clean.length; i++) {
+          const code = MORSE_MAP[clean[i]] || '';
+          for (let j = 0; j < code.length; j++) {
+            const sym = code[j];
+            const dur = sym === '-' ? dash : dot;
+            tone(680, 'sine', dur, 0.16, t, true);
+            if (onPulse) {
+              const startMs = t * 1000;
+              const endMs = (t + dur) * 1000;
+              activeTimers.push(setTimeout(() => onPulse(true, sym), startMs));
+              activeTimers.push(setTimeout(() => onPulse(false, ''), endMs));
+            }
+            t += dur + 0.09;
+          }
+          t += 0.24;
+        }
+        if (onPulse) {
+          activeTimers.push(setTimeout(() => onPulse(false, 'DONE'), t * 1000));
+        }
+      }
+
+      return {
+        isMuted: () => muted,
+        toggleMute: () => { muted = !muted; if (muted) stopMorse(); return muted; },
+        setMuted: (m) => { muted = !!m; },
+        toMorseText,
+        click: () => tone(520, 'triangle', 0.07, 0.1),
+        lens: () => tone(780, 'sine', 0.09, 0.1),
+        hint: () => { tone(587.33, 'triangle', 0.14, 0.12, 0); tone(880, 'sine', 0.2, 0.12, 0.08); },
+        error: () => { tone(170, 'sawtooth', 0.16, 0.12, 0); tone(135, 'sawtooth', 0.2, 0.12, 0.12); },
+        sticker: () => { tone(660, 'sine', 0.09, 0.1, 0); tone(990, 'triangle', 0.14, 0.1, 0.06); },
+        solved: () => {
+          [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => tone(f, 'triangle', 0.26, 0.14, idx * 0.09));
+        },
+        playMorseWord,
+        stopMorse
+      };
+    })();
+
+    // 4. SHOP ITEMS
+    const SHOP_ITEMS = [
+      {
+        id: 'double_coins',
+        type: 'upgrade',
+        icon: '💰',
+        name: 'Amuleto Moedas 2x',
+        price: 140,
+        desc: 'Dobra permanentemente todas as moedas ganhas ao decifrar novos casos.'
+      },
+      {
+        id: 'hint_discount',
+        type: 'upgrade',
+        icon: '🏷️',
+        name: 'Credencial VIP (-20% Dicas)',
+        price: 110,
+        desc: 'Reduz o custo de todas as 3 camadas de dicas em 20%.'
+      },
+      {
+        id: 'clue_radar',
+        type: 'upgrade',
+        icon: '📡',
+        name: 'Radar Forense Oculto',
+        price: 160,
+        desc: 'Sinaliza quando um caso exige Lente Espectral, URL ou Código-Fonte.'
+      },
+      {
+        id: 'frame_gold',
+        type: 'frame',
+        icon: '👑',
+        name: 'Moldura Ouro Real',
+        price: 90,
+        desc: 'Anel dourado brilhante ao redor da sua credencial de agente.',
+        ringClass: 'ring-amber-400 shadow-lg shadow-amber-500/30'
+      },
+      {
+        id: 'frame_neon',
+        type: 'frame',
+        icon: '⚡',
+        name: 'Moldura Plasma Neon',
+        price: 130,
+        desc: 'Contorno púrpura cibernético para agentes de elite.',
+        ringClass: 'ring-fuchsia-400 shadow-lg shadow-fuchsia-500/30'
+      },
+      {
+        id: 'frame_emerald',
+        type: 'frame',
+        icon: '💠',
+        name: 'Moldura Matrix Verde',
+        price: 180,
+        desc: 'Aro esmeralda exclusivo dos mestres criptógrafos.',
+        ringClass: 'ring-emerald-400 shadow-lg shadow-emerald-500/30'
+      }
+    ];
+
+    // 5. SVG VISUAL EVIDENCE GENERATOR HELPERS
+    function svgCard(inner, subtitle = '') {
+      return `
+        <svg viewBox="0 0 420 220" class="w-full max-w-[440px] h-auto select-none">
+          <defs>
+            <pattern id="smallGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(56,189,248,0.08)" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect x="6" y="6" width="408" height="208" rx="16" fill="#070d19" stroke="rgba(56,189,248,0.28)" stroke-width="1.5"/>
+          <rect x="6" y="6" width="408" height="208" rx="16" fill="url(#smallGrid)"/>
+          ${inner}
+          ${subtitle ? `<text x="210" y="202" text-anchor="middle" fill="#64748b" font-family="JetBrains Mono, monospace" font-size="10">${subtitle}</text>` : ''}
+        </svg>
+      `;
+    }
+
+    function caesarShift(str, shift) {
+      return str.toUpperCase().replace(/[A-Z]/g, ch => {
+        const code = ((ch.charCodeAt(0) - 65 + shift) % 26 + 26) % 26;
+        return String.fromCharCode(65 + code);
+      });
+    }
+
+    function vigenereEncode(text, key) {
+      const t = text.toUpperCase().replace(/[^A-Z]/g, '');
+      const k = key.toUpperCase().replace(/[^A-Z]/g, '');
+      let out = '';
+      for (let i = 0; i < t.length; i++) {
+        const shift = k.charCodeAt(i % k.length) - 65;
+        out += String.fromCharCode(((t.charCodeAt(i) - 65 + shift) % 26) + 65);
+      }
+      return out;
+    }
+
+    function atbashTransform(str) {
+      return str.toUpperCase().replace(/[A-Z]/g, ch => String.fromCharCode(90 - (ch.charCodeAt(0) - 65)));
+    }
+
+    function toA1Z26(word) {
+      return word.toUpperCase().split('').map(c => c.charCodeAt(0) - 64).join(' - ');
+    }
+
+    function toBinary8(word) {
+      return word.toUpperCase().split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+    }
+
+    // 6. 90 ORIGINAL CASES + ISOLATED DEV_TEST_VAULT (STRIPPED ON PRODUCTION EXPORT)
+    /* === DEV_TEST_VAULT_START === */
+    const DEV_TEST_VAULT = {};
+    /* === DEV_TEST_VAULT_END === */
+
+    function registerCaseRecord(rawCase) {
+      const answerHash = CryptoVault.computeSyncHash(rawCase.id, rawCase.plainAnswer);
+      const urlHash = rawCase.plainUrlAnswer ? CryptoVault.computeSyncHash(rawCase.id, rawCase.plainUrlAnswer) : null;
+
+      /* === DEV_TEST_VAULT_START === */
+      DEV_TEST_VAULT[rawCase.id] = {
+        answer: rawCase.plainAnswer,
+        urlAnswer: rawCase.plainUrlAnswer || '',
+        method: rawCase.method
+      };
+      /* === DEV_TEST_VAULT_END === */
+
+      return {
+        id: rawCase.id,
+        difficulty: rawCase.difficulty,
+        category: rawCase.category,
+        title: rawCase.title,
+        url: rawCase.url,
+        prompt: rawCase.prompt,
+        subNote: rawCase.subNote,
+        radarTool: rawCase.radarTool || null,
+        morseWord: rawCase.morseWord || null,
+        answerHash,
+        urlHash,
+        hints: rawCase.hints,
+        sourceHtml: rawCase.sourceHtml,
+        svg: rawCase.svg
+      };
+    }
+
+    const CASES = (() => {
+      const list = [];
+
+      // TIER 1: INICIADO (1..10 Handcrafted + 11..30 Procedural)
+      const tier1Handcrafted = [
+        {
+          id: 1, difficulty: 'Iniciado', category: 'Observação Direta', title: 'A Chave na Luz',
+          url: 'enigma.io/caso/01/inicio',
+          prompt: 'Todo arquivo começa com uma palavra. Olhe atentamente para o centro do selo holográfico.',
+          subNote: 'Digite a palavra revelada no campo à direita e clique em VALIDAR.',
+          plainAnswer: 'ORIGEM',
+          hints: [
+            'A resposta está escrita bem no centro da figura geométrica.',
+            'Leia as 6 letras dentro do losango brilhante: O-R-I-G-E-M.',
+            'Letras reveladas: O _ I _ E M (6 letras)'
+          ],
+          method: 'Leitura direta do selo central da imagem SVG.',
+          sourceHtml: `<!-- EVIDÊNCIA #001 -->\n<evidence status="OPEN">\n  <seal>ORIGEM</seal>\n  <!-- Bem-vindo ao ENIGMA.IO! -->\n</evidence>`,
+          svg: svgCard(`
+            <circle cx="210" cy="105" r="64" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 4"/>
+            <polygon points="210,45 270,105 210,165 150,105" fill="rgba(56,189,248,0.12)" stroke="#f59e0b" stroke-width="2.5"/>
+            <text x="210" y="112" text-anchor="middle" fill="#f8fafc" font-family="JetBrains Mono, monospace" font-weight="bold" font-size="22" letter-spacing="4">ORIGEM</text>
+          `, 'SELO DE AUTENTICAÇÃO #01')
+        },
+        {
+          id: 2, difficulty: 'Iniciado', category: 'Manipulação de URL', title: 'O Outro Lado do Dia',
+          url: 'enigma.io/caso/02/dia',
+          prompt: 'O sol se pôs sobre o servidor. Às vezes a resposta não se digita na caixa de senha, mas no próprio endereço acima.',
+          subNote: 'Altere a última palavra da barra de endereço (enigma.io/caso/02/dia) e aperte IR!',
+          plainUrlAnswer: 'enigma.io/caso/02/noite',
+          plainAnswer: 'NOITE',
+          radarTool: 'url',
+          hints: [
+            'Olhe para a barra de endereço no topo do cartão: enigma.io/caso/02/dia.',
+            'Qual é o oposto de "dia"? Troque "dia" por essa palavra na barra de URL acima e clique em IR.',
+            'Letras reveladas: N _ I _ E (5 letras)'
+          ],
+          method: 'Alterar o segmento final da barra de URL virtual de /dia para /noite.',
+          sourceHtml: `<!-- DICA DE ROTEAMENTO -->\n<route current="/caso/02/dia" opposite="/caso/02/noite" />`,
+          svg: svgCard(`
+            <circle cx="145" cy="105" r="34" fill="#fbbf24" opacity="0.9"/>
+            <line x1="210" y1="40" x2="210" y2="170" stroke="#475569" stroke-width="2" stroke-dasharray="5 5"/>
+            <path d="M 285 72 A 34 34 0 1 0 308 132 A 26 26 0 1 1 285 72 Z" fill="#38bdf8"/>
+            <text x="145" y="162" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono" font-size="12">/dia</text>
+            <text x="285" y="162" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono" font-size="12">/???</text>
+          `, 'MODO DE NAVEGAÇÃO POR URL')
+        },
+        {
+          id: 3, difficulty: 'Iniciado', category: 'Código-Fonte', title: 'Entrelinhas do Sistema',
+          url: 'enigma.io/caso/03/silencio',
+          prompt: 'A tela parece vazia, mas todo documento guarda anotações invisíveis nos bastidores.',
+          subNote: 'Use a ferramenta forense </> Código-Fonte logo abaixo da imagem.',
+          radarTool: 'source',
+          plainAnswer: 'SOMBRA',
+          hints: [
+            'Clique no botão azul "</> Código-Fonte" abaixo da tela.',
+            'Leia o comentário verde dentro do código HTML da evidência.',
+            'Letras reveladas: S _ M _ R A (6 letras)'
+          ],
+          method: 'Abrir o inspetor </> Código-Fonte e ler o comentário oculto.',
+          sourceHtml: `<!DOCTYPE html>\n<archive id="003">\n  <!-- EXCELENTE! Nem tudo aparece na superfície. -->\n  <!-- PALAVRA-CHAVE DESTE ARQUIVO: SOMBRA -->\n  <canvas status="BLANK" />\n</archive>`,
+          svg: svgCard(`
+            <rect x="130" y="65" width="160" height="80" rx="10" fill="none" stroke="#334155" stroke-width="2"/>
+            <text x="210" y="110" text-anchor="middle" fill="#475569" font-family="JetBrains Mono" font-size="13">[ NADA VISÍVEL AQUI ]</text>
+          `, 'INSPECIONE O CÓDIGO-FONTE')
+        },
+        {
+          id: 4, difficulty: 'Iniciado', category: 'Lente Espectral', title: 'Tinta Invisível',
+          url: 'enigma.io/caso/04/espectro',
+          prompt: 'Um agente rabiscou ruídos cianos por cima de uma anotação vermelha.',
+          subNote: 'Ative a ferramenta 👓 Lente Espectral para filtrar as cores.',
+          radarTool: 'lens',
+          plainAnswer: 'RUBI',
+          hints: [
+            'Clique no botão "👓 Lente" abaixo da imagem para alternar para Lente Vermelha.',
+            'Com a Lente Vermelha ativa, 4 letras aparecem nitidamente no centro.',
+            'Letras reveladas: R _ B _ (4 letras)'
+          ],
+          method: 'Alternar a Lente Espectral para o modo Vermelho para revelar a camada oculta.',
+          sourceHtml: `<!-- ESTEGANOGRAFIA CROMÁTICA -->\n<layer color="red" hidden="true">Use a Lente Vermelha</layer>`,
+          svg: svgCard(`
+            <g class="stego-cover">
+              <line x1="70" y1="60" x2="350" y2="155" stroke="#22d3ee" stroke-width="6"/>
+              <line x1="70" y1="155" x2="350" y2="60" stroke="#22d3ee" stroke-width="6"/>
+              <circle cx="210" cy="108" r="56" fill="none" stroke="#06b6d4" stroke-width="8"/>
+              <text x="210" y="115" text-anchor="middle" fill="#22d3ee" font-family="JetBrains Mono" font-weight="bold" font-size="30">XXXX</text>
+            </g>
+            <g class="stego-red">
+              <text x="210" y="118" text-anchor="middle" fill="#ff2a55" font-family="JetBrains Mono" font-weight="800" font-size="38" letter-spacing="8">RUBI</text>
+            </g>
+          `, 'CAMADA CROMÁTICA DETECTADA')
+        },
+        {
+          id: 5, difficulty: 'Iniciado', category: 'Reflexo & Espelho', title: 'Do Avesso',
+          url: 'enigma.io/caso/05/espelho',
+          prompt: 'O texto foi transmitido ao contrário pelo canal de emergência.',
+          subNote: 'Leia da direita para a esquerda.',
+          plainAnswer: 'ESPELHO',
+          hints: [
+            'Comece pela última letra à direita (E) e siga para a esquerda.',
+            'O-H-L-E-P-S-E invertido forma um objeto que reflete imagens.',
+            'Letras reveladas: E _ P _ L _ O (7 letras)'
+          ],
+          method: 'Inverter a string OHLEPSE para ESPELHO.',
+          sourceHtml: `<!-- DIREÇÃO REVERSA: <- <- <- -->\n<stream dir="rtl">OHLEPSE</stream>`,
+          svg: svgCard(`
+            <text x="210" y="116" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono" font-weight="bold" font-size="32" letter-spacing="6">OHLEPSE</text>
+            <path d="M 290 142 L 130 142 M 142 134 L 130 142 L 142 150" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+          `, 'FLUXO INVERTIDO')
+        },
+        {
+          id: 6, difficulty: 'Iniciado', category: 'Código Morse', title: 'Batidas na Escuridão',
+          url: 'enigma.io/caso/06/frequencia',
+          prompt: 'O telégrafo antigo está enviando uma palavra de 3 letras em Código Morse.',
+          subNote: 'Toque em 📡 Sinal Áudio ou decodifique os pontos e traços abaixo.',
+          morseWord: 'LUZ',
+          plainAnswer: 'LUZ',
+          hints: [
+            'Use a "📖 Tabela Morse" no canto inferior direito para traduzir .-.. / ..- / --..',
+            '.-.. = L | ..- = U | --.. = Z',
+            'Letras reveladas: L _ Z (3 letras)'
+          ],
+          method: 'Decodificar .-.. ..- --.. em Código Morse -> LUZ.',
+          sourceHtml: `<!-- TELEMETRIA MORSE -->\n<morse>.-..   ..-   --..</morse>`,
+          svg: svgCard(`
+            <text x="210" y="102" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono" font-weight="bold" font-size="26" letter-spacing="4">.-..   ..-   --..</text>
+            <text x="210" y="138" text-anchor="middle" fill="#94a3b8" font-family="JetBrains Mono" font-size="12">[ CLIQUE EM SINAL ÁUDIO PARA OUVIR ]</text>
+          `, 'TRANSMISSÃO TELEGRÁFICA')
+        },
+        {
+          id: 7, difficulty: 'Iniciado', category: 'Alfabeto Numérico', title: 'Coordenadas Alfabéticas',
+          url: 'enigma.io/caso/07/numeros',
+          prompt: 'Cada número corresponde à posição da letra no alfabeto (A=1, B=2, C=3...).',
+          subNote: 'Converta os 5 números em letras.',
+          plainAnswer: 'CHAVE',
+          hints: [
+            '3 é a 3ª letra (C), 8 é a 8ª letra (H)...',
+            '3=C, 8=H, 1=A, 22=V, 5=E.',
+            'Letras reveladas: C _ A _ E (5 letras)'
+          ],
+          method: 'Substituição A1Z26: 3-8-1-22-5 -> CHAVE.',
+          sourceHtml: `<!-- CIFRA A1Z26 -->\n<seq>3 - 8 - 1 - 22 - 5</seq>`,
+          svg: svgCard(`
+            <text x="210" y="114" text-anchor="middle" fill="#34d399" font-family="JetBrains Mono" font-weight="bold" font-size="28" letter-spacing="3">3 - 8 - 1 - 22 - 5</text>
+          `, 'A=1 • B=2 • C=3 ... Z=26')
+        },
+        {
+          id: 8, difficulty: 'Iniciado', category: 'Charada Visual', title: 'O Que Sempre Passa',
+          url: 'enigma.io/caso/08/ponteiros',
+          prompt: 'Tenho ponteiros mas não aponto caminhos; corro sem sair do lugar e todos me consultam.',
+          subNote: 'Observe os algarismos romanos no mostrador.',
+          plainAnswer: 'RELOGIO',
+          hints: [
+            'O objeto mostrado no círculo possui XII, III, VI e IX.',
+            'Mede horas, minutos e segundos.',
+            'Letras reveladas: R _ L _ G _ O (7 letras)'
+          ],
+          method: 'Identificação do objeto representado pelo mostrador romano -> RELOGIO.',
+          sourceHtml: `<!-- ENIGMA CLÁSSICO -->\n<riddle subject="TIMEKEEPER" />`,
+          svg: svgCard(`
+            <circle cx="210" cy="106" r="58" fill="none" stroke="#f59e0b" stroke-width="3"/>
+            <text x="210" y="64" text-anchor="middle" fill="#fef3c7" font-family="Cinzel" font-size="13">XII</text>
+            <text x="255" y="110" text-anchor="middle" fill="#fef3c7" font-family="Cinzel" font-size="13">III</text>
+            <text x="210" y="156" text-anchor="middle" fill="#fef3c7" font-family="Cinzel" font-size="13">VI</text>
+            <text x="165" y="110" text-anchor="middle" fill="#fef3c7" font-family="Cinzel" font-size="13">IX</text>
+            <line x1="210" y1="106" x2="210" y2="74" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+            <line x1="210" y1="106" x2="236" y2="106" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+          `, 'GUARDIÃO DAS HORAS')
+        },
+        {
+          id: 9, difficulty: 'Iniciado', category: 'Manipulação de URL', title: 'Porta Trancada',
+          url: 'enigma.io/caso/09/fechado',
+          prompt: 'O acesso ao cofre está bloqueado. Mude o estado do cadeado na barra de endereço!',
+          subNote: 'Troque "fechado" por seu oposto na URL acima.',
+          plainUrlAnswer: 'enigma.io/caso/09/aberto',
+          plainAnswer: 'ABERTO',
+          radarTool: 'url',
+          hints: [
+            'Veja a URL no topo: enigma.io/caso/09/fechado.',
+            'Para destrancar o cadeado, substitua "fechado" por "aberto" na URL e aperte IR.',
+            'Letras reveladas: A _ E _ T O (6 letras)'
+          ],
+          method: 'Trocar /fechado por /aberto na barra de endereço.',
+          sourceHtml: `<!-- LOCK STATUS: LOCKED -->\n<hint>Change URL suffix from /fechado to /aberto</hint>`,
+          svg: svgCard(`
+            <rect x="180" y="98" width="60" height="48" rx="8" fill="#ef4444" opacity="0.85"/>
+            <path d="M 192 98 V 80 A 18 18 0 0 1 228 80 V 98" fill="none" stroke="#94a3b8" stroke-width="6"/>
+            <circle cx="210" cy="120" r="6" fill="#0f172a"/>
+          `, 'STATUS: /fechado')
+        },
+        {
+          id: 10, difficulty: 'Iniciado', category: 'Acróstico Oculto', title: 'As Iniciais Falam',
+          url: 'enigma.io/caso/10/versos',
+          prompt: 'Leia verticalmente a primeira letra de cada linha deste relatório interceptado.',
+          subNote: 'De cima para baixo, as letras iniciais formam uma palavra.',
+          plainAnswer: 'NORTE',
+          hints: [
+            'Pegue apenas a primeira letra de cada uma das 5 linhas.',
+            'N - O - R - T - E.',
+            'Letras reveladas: N _ R _ E (5 letras)'
+          ],
+          method: 'Leitura acróstica das iniciais das 5 linhas -> NORTE.',
+          sourceHtml: `<!-- ACRÓSTICO VERTICAL -->\n<lines count="5" read="vertical_first_char" />`,
+          svg: svgCard(`
+            <g font-family="JetBrains Mono" font-size="14" fill="#cbd5e1">
+              <text x="115" y="64"><tspan fill="#38bdf8" font-weight="bold">N</tspan>inguém suspeita do plano</text>
+              <text x="115" y="88"><tspan fill="#38bdf8" font-weight="bold">O</tspan>nde guardamos o mapa</text>
+              <text x="115" y="112"><tspan fill="#38bdf8" font-weight="bold">R</tspan>umos antigos apontam</text>
+              <text x="115" y="136"><tspan fill="#38bdf8" font-weight="bold">T</tspan>odas as bússolas para</text>
+              <text x="115" y="160"><tspan fill="#38bdf8" font-weight="bold">E</tspan>ste ponto cardeal.</text>
+            </g>
+          `, 'RELATÓRIO INTERCEPTADO')
+        }
+      ];
+
+      tier1Handcrafted.forEach(item => list.push(registerCaseRecord(item)));
+
+      const tier1Dynamic = [
+        { word: 'FOGO', cat: 'Elemento Primordial', desc: 'Quatro letras aquecem a forja. Decodifique o código numérico.', mode: 'a1z26' },
+        { word: 'AGUA', cat: 'Elemento Primordial', desc: 'Flui sem forma, mas seu código está invertido no radar.', mode: 'reverse' },
+        { word: 'VENTO', cat: 'Elemento Primordial', desc: 'Sopra pelo telégrafo em pontos e traços.', mode: 'morse' },
+        { word: 'TERRA', cat: 'Elemento Primordial', desc: 'Firme sob os pés, escondida sob a Lente Ciana.', mode: 'cyan' },
+        { word: 'ASTRO', cat: 'Observatório', desc: 'Cada letra avançou 1 casa no alfabeto (Cifra de César +1: B→A, C→B...).', mode: 'caesar1' },
+        { word: 'COMETA', cat: 'Observatório', desc: 'Um visitante celeste deixou sua assinatura no </> Código-Fonte.', mode: 'source' },
+        { word: 'ECLIPSE', cat: 'Observatório', desc: 'A lua cobriu o sol. Mude /sol para /eclipse na barra de URL!', mode: 'url', urlFrom: 'sol', urlTo: 'eclipse' },
+        { word: 'ORBITA', cat: 'Observatório', desc: 'Decodifique a sequência numérica A=1..Z=26.', mode: 'a1z26' },
+        { word: 'PRISMA', cat: 'Óptica & Luz', desc: 'Use a Lente Vermelha para separar a palavra do espectro.', mode: 'red' },
+        { word: 'CRISTAL', cat: 'Óptica & Luz', desc: 'Refletido ao contrário no espelho do laboratório.', mode: 'reverse' },
+        { word: 'RADAR', cat: 'Telemetria', desc: 'Palíndromo detectado no sinal sonoro Morse.', mode: 'morse' },
+        { word: 'SINAL', cat: 'Telemetria', desc: 'Avançou +1 letra no alfabeto (B=A, C=B...).', mode: 'caesar1' },
+        { word: 'COFRE', cat: 'Segurança', desc: 'Inspecione os metadados EXIF no </> Código-Fonte.', mode: 'source' },
+        { word: 'SENHA', cat: 'Segurança', desc: 'Troque /bloqueado por /senha na barra de endereço.', mode: 'url', urlFrom: 'bloqueado', urlTo: 'senha' },
+        { word: 'ESCUDO', cat: 'Segurança', desc: 'Camuflado sob interferência vermelha. Ative a Lente Ciana!', mode: 'cyan' },
+        { word: 'MAPA', cat: 'Cartografia', desc: 'Quatro números revelam onde o tesouro está.', mode: 'a1z26' },
+        { word: 'BUSSOLA', cat: 'Cartografia', desc: 'Texto transmitido de trás para frente.', mode: 'reverse' },
+        { word: 'FAROL', cat: 'Cartografia', desc: 'Sinal luminoso convertido em Código Morse.', mode: 'morse' },
+        { word: 'PORTAL', cat: 'Dimensão', desc: 'Desloque cada letra 1 posição para trás no alfabeto.', mode: 'caesar1' },
+        { word: 'INFINITO', cat: 'Dimensão', desc: 'O símbolo ∞ apareceu. Troque /finito por /infinito na URL!', mode: 'url', urlFrom: 'finito', urlTo: 'infinito' }
+      ];
+
+      tier1Dynamic.forEach((item, idx) => {
+        list.push(buildProceduralCase(11 + idx, 'Iniciado', item));
+      });
+
+      // TIER 2: DECIFRADOR (31..60)
+      const tier2Specs = [
+        { word: 'ENIGMA', cat: 'Criptografia César +3', desc: 'Júlio César protegia suas mensagens deslocando cada letra 3 casas à frente (D→A, E→B...).', mode: 'caesar3' },
+        { word: 'BINARIO', cat: 'Linguagem de Máquina', desc: 'Zeros e uns formam códigos ASCII de 8 bits. Converta para texto.', mode: 'binary' },
+        { word: 'ESPECTRO', cat: 'Esteganografia RGB', desc: 'Duas camadas se sobrepõem. Isole a frequência Ciana com a Lente Espectral.', mode: 'cyan' },
+        { word: 'LABIRINTO', cat: 'Roteamento Oculto', desc: 'Você está em /beco. Encontre a saída alterando a URL para /labirinto.', mode: 'url', urlFrom: 'beco', urlTo: 'labirinto' },
+        { word: 'TELEMETRIA', cat: 'Auditoria de Rede', desc: 'Os pacotes do servidor escondem uma tag <secret> no Código-Fonte.', mode: 'source' },
+        { word: 'SATELITE', cat: 'Estação Orbital', desc: 'Transmissão Morse de alta altitude. Ouça ou decodifique os sinais.', mode: 'morse' },
+        { word: 'QUIMERA', cat: 'Mitologia Cifrada', desc: 'Cada letra foi deslocada +3 posições no alfabeto.', mode: 'caesar3' },
+        { word: 'ALGORITMO', cat: 'Lógica Computacional', desc: 'Inversão textual detectada no barramento.', mode: 'reverse' },
+        { word: 'HORIZONTE', cat: 'Navegação Astral', desc: 'Filtre o ruído visual usando a Lente Vermelha.', mode: 'red' },
+        { word: 'VETOR', cat: 'Matemática Aplicada', desc: 'Código binário ASCII de 5 bytes.', mode: 'binary' },
+        { word: 'PARADOXO', cat: 'Lógica Lateral', desc: 'A resposta está no oposto de /certeza na URL.', mode: 'url', urlFrom: 'certeza', urlTo: 'paradoxo' },
+        { word: 'SILICIO', cat: 'Hardware Forense', desc: 'Inspecione o número de série no EXIF do Código-Fonte.', mode: 'source' },
+        { word: 'FREQUENCIA', cat: 'Acústica', desc: 'Cifra de César (+3) interceptada no rádio.', mode: 'caesar3' },
+        { word: 'ANOMALIA', cat: 'Quântica', desc: 'Onda sonora em Código Morse.', mode: 'morse' },
+        { word: 'HOLOGRAMA', cat: 'Projeção Óptica', desc: 'Camada oculta em vermelho puro.', mode: 'red' },
+        { word: 'MATRIZ', cat: 'Álgebra', desc: 'Bytes ASCII aguardando decodificação.', mode: 'binary' },
+        { word: 'FRAGMENTO', cat: 'Arqueologia Digital', desc: 'Texto espelhado recuperado de um disco danificado.', mode: 'reverse' },
+        { word: 'VERTICE', cat: 'Geometria', desc: 'Cifra de César (+3).', mode: 'caesar3' },
+        { word: 'CREPUSCULO', cat: 'Cronologia', desc: 'Nem dia, nem noite. Altere /meiodia para /crepusculo na URL.', mode: 'url', urlFrom: 'meiodia', urlTo: 'crepusculo' },
+        { word: 'PROTOCOLO', cat: 'Segurança Cibernética', desc: 'Chave escondida nos metadados do servidor.', mode: 'source' },
+        { word: 'CATALISADOR', cat: 'Química', desc: 'Sinal Morse enviado pelo laboratório.', mode: 'morse' },
+        { word: 'NEBULOSA', cat: 'Astrofísica', desc: 'Visível apenas sob a Lente Ciana.', mode: 'cyan' },
+        { word: 'AXIOMA', cat: 'Filosofia Matemática', desc: '6 bytes em código binário.', mode: 'binary' },
+        { word: 'PERGAMINHO', cat: 'Arquivo Antigo', desc: 'Texto escrito da direita para a esquerda.', mode: 'reverse' },
+        { word: 'SENTINELA', cat: 'Defesa', desc: 'Deslocamento César (+3).', mode: 'caesar3' },
+        { word: 'ECLIPTICA', cat: 'Astronomia', desc: 'Ative a Lente Vermelha para revelar a órbita.', mode: 'red' },
+        { word: 'ASSINATURA', cat: 'Criptografia', desc: 'Hash comentado no Código-Fonte.', mode: 'source' },
+        { word: 'CONVERGENCIA', cat: 'Singularidade', desc: 'Altere /divergencia para /convergencia na barra de URL.', mode: 'url', urlFrom: 'divergencia', urlTo: 'convergencia' },
+        { word: 'POLARIDADE', cat: 'Eletromagnetismo', desc: 'Transmissão Morse.', mode: 'morse' },
+        { word: 'SINTESE', cat: 'Núcleo Central', desc: '7 bytes binários encerram o nível Decifrador.', mode: 'binary' }
+      ];
+
+      tier2Specs.forEach((item, idx) => {
+        list.push(buildProceduralCase(31 + idx, 'Decifrador', item));
+      });
+
+      // TIER 3: MESTRE (61..90)
+      const tier3Specs = [
+        { word: 'VIGENERE', cat: 'Cifra Polialfabética', desc: 'A cifra clássica! Use a chave "SOL" para decodificar o texto cifrado.', mode: 'vigenere', vKey: 'SOL' },
+        { word: 'ATBASH', cat: 'Espelho Alfabético', desc: 'Na cifra Atbash, A=Z, B=Y, C=X... Inverta todo o alfabeto!', mode: 'atbash' },
+        { word: 'DUALIDADE', cat: 'Camadas Cruzadas', desc: 'Metade da palavra está na Lente Vermelha e a outra metade no Código-Fonte!', mode: 'dual_red_source' },
+        { word: 'OBSIDIANA', cat: 'Mineral Arcano', desc: 'Cifra de Vigenère com a chave "LUA".', mode: 'vigenere', vKey: 'LUA' },
+        { word: 'CRONOS', cat: 'Guardião do Tempo', desc: 'Cifra Atbash (A↔Z, B↔Y).', mode: 'atbash' },
+        { word: 'SINGULARIDADE', cat: 'Horizonte de Eventos', desc: 'Altere o final da URL (/vazio → /singularidade).', mode: 'url', urlFrom: 'vazio', urlTo: 'singularidade' },
+        { word: 'CRIPTOGRAFIA', cat: 'Arte Secreta', desc: 'Cifra de Vigenère com a chave "CHAVE".', mode: 'vigenere', vKey: 'CHAVE' },
+        { word: 'ALQUIMIA', cat: 'Transmutação', desc: 'Combine a Lente Ciana (início) com o Código-Fonte (fim).', mode: 'dual_cyan_source' },
+        { word: 'METAMORFOSE', cat: 'Transformação', desc: 'Cifra Atbash completa.', mode: 'atbash' },
+        { word: 'ENTROPIA', cat: 'Termodinâmica', desc: 'Cifra de Vigenère usando a chave "CAOS".', mode: 'vigenere', vKey: 'CAOS' },
+        { word: 'ARQUITETO', cat: 'Código Primário', desc: 'Binário invertido! Leia os bytes e depois inverta a palavra.', mode: 'binary_rev' },
+        { word: 'LABIRINTICO', cat: 'Topologia', desc: 'Cifra Atbash (A=Z, B=Y...).', mode: 'atbash' },
+        { word: 'SIMETRIA', cat: 'Geometria Sagrada', desc: 'Metade na Lente Vermelha, metade no Código-Fonte.', mode: 'dual_red_source' },
+        { word: 'ASTRONOMIA', cat: 'Cosmologia', desc: 'Cifra de Vigenère com chave "CEU".', mode: 'vigenere', vKey: 'CEU' },
+        { word: 'GENESIS', cat: 'Origem Absoluta', desc: 'Binário invertido de 7 letras.', mode: 'binary_rev' },
+        { word: 'OBELISCO', cat: 'Monumento', desc: 'Cifra Atbash.', mode: 'atbash' },
+        { word: 'TRANSCENDENCIA', cat: 'Elevação', desc: 'Troque /limite por /transcendencia na URL.', mode: 'url', urlFrom: 'limite', urlTo: 'transcendencia' },
+        { word: 'CONSPIRACAO', cat: 'Arquivo Ultra-Secreto', desc: 'Vigenère com chave "REDE".', mode: 'vigenere', vKey: 'REDE' },
+        { word: 'TELEPATIA', cat: 'Conexão Mental', desc: 'Metade na Lente Ciana + metade no Código-Fonte.', mode: 'dual_cyan_source' },
+        { word: 'ORACULO', cat: 'Profecia Digital', desc: 'Binário invertido.', mode: 'binary_rev' },
+        { word: 'ESFINGE', cat: 'Guardiã de Tebas', desc: 'Cifra Atbash (Z=A, Y=B...).', mode: 'atbash' },
+        { word: 'CATACUMBA', cat: 'Subterrâneo', desc: 'Vigenère com chave "ECO".', mode: 'vigenere', vKey: 'ECO' },
+        { word: 'ILLUMINATI', cat: 'Sociedade Oculta', desc: 'Metade Vermelha + metade Código-Fonte.', mode: 'dual_red_source' },
+        { word: 'QUANTICO', cat: 'Superposição', desc: 'Binário invertido de 8 bytes.', mode: 'binary_rev' },
+        { word: 'APOCALIPSE', cat: 'Revelação', desc: 'Cifra Atbash.', mode: 'atbash' },
+        { word: 'PANDORA', cat: 'A Caixa Selada', desc: 'Vigenère com chave "ABRIR".', mode: 'vigenere', vKey: 'ABRIR' },
+        { word: 'ETERNO', cat: 'Tempo Infinito', desc: 'Metade Ciana + metade Código-Fonte.', mode: 'dual_cyan_source' },
+        { word: 'LEVIATA', cat: 'Abismo Profundo', desc: 'Binário invertido.', mode: 'binary_rev' },
+        { word: 'SOBERANO', cat: 'Penúltimo Selo', desc: 'Cifra Atbash.', mode: 'atbash' },
+        { word: 'ONISCIENCIA', cat: 'O Arquivo Final (90/90)', desc: 'O último selo do ENIGMA.IO: decodifique a Cifra de Vigenère com a chave "MESTRE".', mode: 'vigenere', vKey: 'MESTRE' }
+      ];
+
+      tier3Specs.forEach((item, idx) => {
+        list.push(buildProceduralCase(61 + idx, 'Mestre', item));
+      });
+
+      return list;
+    })();
+
+    function maskedLetterPattern(word) {
+      return word
+        .split('')
+        .map((ch, idx) => (idx === 0 || idx === word.length - 1 || idx % 2 === 0 ? ch : '_'))
+        .join(' ') + ` (${word.length} letras)`;
+    }
+
+    function buildProceduralCase(id, difficulty, spec) {
+      const w = spec.word.toUpperCase();
+      const padId = String(id).padStart(2, '0');
+      let url = `enigma.io/caso/${padId}/arquivo`;
+      let plainUrlAnswer = null;
+      let subNote = 'Decifre a pista acima e insira a palavra-chave.';
+      let radarTool = null;
+      let morseWord = null;
+      let hints = [];
+      let method = '';
+      let sourceHtml = `<!-- ARQUIVO #${String(id).padStart(3, '0')} | NÍVEL: ${difficulty.toUpperCase()} -->\n<evidence id="${id}" integrity="SHA256_LOCKED" />`;
+      let svgInner = '';
+      const maskHint = `Padrão de letras: ${maskedLetterPattern(w)}`;
+
+      switch (spec.mode) {
+        case 'a1z26': {
+          const seq = toA1Z26(w);
+          svgInner = `<text x="210" y="114" text-anchor="middle" fill="#34d399" font-family="JetBrains Mono" font-weight="bold" font-size="23" letter-spacing="2">${seq}</text>`;
+          hints = [
+            'Cada número representa a posição da letra no alfabeto (A=1, B=2, C=3...).',
+            `Converta os números: ${seq} usando a Tabela A=1.`,
+            maskHint
+          ];
+          method = `Conversão numérica A1Z26 (${seq}) -> ${w}.`;
+          break;
+        }
+        case 'reverse': {
+          const rev = w.split('').reverse().join('');
+          svgInner = `
+            <text x="210" y="112" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono" font-weight="bold" font-size="28" letter-spacing="5">${rev}</text>
+            <path d="M 295 140 L 125 140 M 138 132 L 125 140 L 138 148" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+          `;
+          hints = [
+            'A palavra foi gravada de trás para frente.',
+            `Leia "${rev}" da direita para a esquerda.`,
+            maskHint
+          ];
+          method = `Inversão da string "${rev}" -> ${w}.`;
+          break;
+        }
+        case 'morse': {
+          morseWord = w;
+          subNote = 'Clique em 📡 Sinal Áudio ou use a 📖 Tabela Morse para traduzir.';
+          svgInner = `
+            <circle cx="210" cy="95" r="32" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4"/>
+            <text x="210" y="101" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono" font-weight="bold" font-size="14">MORSE TX</text>
+            <text x="210" y="148" text-anchor="middle" fill="#cbd5e1" font-family="JetBrains Mono" font-size="12">Toque em [📡 Sinal Áudio] abaixo</text>
+          `;
+          hints = [
+            'Clique no botão "📡 Sinal Áudio" para ouvir os bipes curtos (.) e longos (-).',
+            `A transmissão em Morse soletra uma palavra de ${w.length} letras (${spec.cat}).`,
+            maskHint
+          ];
+          method = `Decodificação do sinal sonoro Morse -> ${w}.`;
+          break;
+        }
+        case 'red': {
+          radarTool = 'lens';
+          subNote = 'Use a ferramenta 👓 Lente Espectral (modo Vermelho) para revelar o texto.';
+          svgInner = `
+            <g class="stego-cover">
+              <rect x="85" y="65" width="250" height="85" rx="12" fill="none" stroke="#22d3ee" stroke-width="4"/>
+              <line x1="85" y1="65" x2="335" y2="150" stroke="#06b6d4" stroke-width="5"/>
+              <line x1="85" y1="150" x2="335" y2="65" stroke="#06b6d4" stroke-width="5"/>
+            </g>
+            <g class="stego-red">
+              <text x="210" y="118" text-anchor="middle" fill="#ff2a55" font-family="JetBrains Mono" font-weight="800" font-size="32" letter-spacing="5">${w}</text>
+            </g>
+          `;
+          hints = [
+            'Ative a "👓 Lente" abaixo da imagem até aparecer "Lente: Vermelha".',
+            'O filtro vermelho isola a camada oculta por baixo das linhas cianas.',
+            maskHint
+          ];
+          method = `Filtro espectral Vermelho revela "${w}".`;
+          break;
+        }
+        case 'cyan': {
+          radarTool = 'lens';
+          subNote = 'Use a ferramenta 👓 Lente Espectral (modo Ciano) para revelar o texto.';
+          svgInner = `
+            <g class="stego-cover">
+              <circle cx="210" cy="108" r="54" fill="none" stroke="#f43f5e" stroke-width="7"/>
+              <line x1="110" y1="108" x2="310" y2="108" stroke="#fb7185" stroke-width="6"/>
+            </g>
+            <g class="stego-cyan">
+              <text x="210" y="118" text-anchor="middle" fill="#00f0ff" font-family="JetBrains Mono" font-weight="800" font-size="32" letter-spacing="5">${w}</text>
+            </g>
+          `;
+          hints = [
+            'Clique duas vezes no botão "👓 Lente" até ativar o modo "Lente: Ciana".',
+            `A camada ciana revelará uma palavra de ${w.length} letras.`,
+            maskHint
+          ];
+          method = `Filtro espectral Ciano revela "${w}".`;
+          break;
+        }
+        case 'caesar1': {
+          const enc = caesarShift(w, 1);
+          svgInner = `
+            <text x="210" y="106" text-anchor="middle" fill="#e879f9" font-family="JetBrains Mono" font-weight="bold" font-size="28" letter-spacing="5">${enc}</text>
+            <text x="210" y="138" text-anchor="middle" fill="#94a3b8" font-family="JetBrains Mono" font-size="12">SHIFT +1 (B → A, C → B)</text>
+          `;
+          hints = [
+            'Cada letra foi substituída pela letra seguinte no alfabeto.',
+            `Volte 1 letra no alfabeto para cada caractere de "${enc}".`,
+            maskHint
+          ];
+          method = `Cifra de César (-1) sobre "${enc}" -> ${w}.`;
+          break;
+        }
+        case 'caesar3': {
+          const enc = caesarShift(w, 3);
+          svgInner = `
+            <text x="210" y="106" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono" font-weight="bold" font-size="26" letter-spacing="4">${enc}</text>
+            <text x="210" y="138" text-anchor="middle" fill="#94a3b8" font-family="JetBrains Mono" font-size="12">CÉSAR +3 (D → A, E → B)</text>
+          `;
+          hints = [
+            'Cifra de César clássica: cada letra avançou 3 posições no alfabeto.',
+            `Volte 3 letras para trás a partir de "${enc}".`,
+            maskHint
+          ];
+          method = `Cifra de César (-3) sobre "${enc}" -> ${w}.`;
+          break;
+        }
+        case 'url': {
+          url = `enigma.io/caso/${padId}/${spec.urlFrom}`;
+          plainUrlAnswer = `enigma.io/caso/${padId}/${spec.urlTo}`;
+          radarTool = 'url';
+          subNote = `Edite a barra de URL no topo trocando "/${spec.urlFrom}" e clique em IR!`;
+          svgInner = `
+            <rect x="75" y="75" width="270" height="64" rx="12" fill="rgba(56,189,248,0.1)" stroke="#38bdf8" stroke-width="2"/>
+            <text x="210" y="104" text-anchor="middle" fill="#94a3b8" font-family="JetBrains Mono" font-size="12">ROTA ATUAL: /${spec.urlFrom}</text>
+            <text x="210" y="126" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono" font-weight="bold" font-size="13">DESTINO: /???</text>
+          `;
+          hints = [
+            `Observe o final da barra de endereço no topo: /${spec.urlFrom}.`,
+            `Substitua "${spec.urlFrom}" pelo termo oposto/complementar na URL acima e aperte IR.`,
+            maskHint
+          ];
+          method = `Alterar rota da URL de /${spec.urlFrom} para /${spec.urlTo}.`;
+          break;
+        }
+        case 'source': {
+          radarTool = 'source';
+          subNote = 'Abra o inspetor </> Código-Fonte para ler os metadados ocultos.';
+          sourceHtml = `<!-- RELATÓRIO DE AUDITORIA #${padId} -->\n<metadata>\n  <classification>${difficulty}</classification>\n  <!-- CHAVE_MESTRA_EXTRAIDA: ${w} -->\n</metadata>`;
+          svgInner = `
+            <polygon points="210,55 265,108 210,161 155,108" fill="none" stroke="#38bdf8" stroke-width="2"/>
+            <text x="210" y="113" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono" font-weight="bold" font-size="18">&lt;/&gt;</text>
+          `;
+          hints = [
+            'Clique no botão "</> Código-Fonte" abaixo da área visual.',
+            'Procure pelo campo CHAVE_MESTRA_EXTRAIDA nos comentários.',
+            maskHint
+          ];
+          method = `Inspeção do </> Código-Fonte revela ${w}.`;
+          break;
+        }
+        case 'binary': {
+          const bin = toBinary8(w);
+          const half = Math.ceil(w.length / 2);
+          const line1 = w.slice(0, half).split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+          const line2 = w.slice(half).split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+          svgInner = `
+            <text x="210" y="96" text-anchor="middle" fill="#2dd4bf" font-family="JetBrains Mono" font-weight="bold" font-size="13">${line1}</text>
+            <text x="210" y="124" text-anchor="middle" fill="#2dd4bf" font-family="JetBrains Mono" font-weight="bold" font-size="13">${line2}</text>
+          `;
+          sourceHtml = `<!-- ASCII BINARY STREAM -->\n<bytes>${bin}</bytes>`;
+          hints = [
+            'Cada grupo de 8 bits representa um caractere ASCII maiúsculo (01000001 = 65 = A).',
+            'Converta cada byte de binário para decimal e depois para letra (65=A, 66=B...).',
+            maskHint
+          ];
+          method = `Conversão Binário ASCII -> ${w}.`;
+          break;
+        }
+        case 'binary_rev': {
+          const rev = w.split('').reverse().join('');
+          const half = Math.ceil(rev.length / 2);
+          const line1 = rev.slice(0, half).split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+          const line2 = rev.slice(half).split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+          svgInner = `
+            <text x="210" y="92" text-anchor="middle" fill="#e879f9" font-family="JetBrains Mono" font-weight="bold" font-size="13">${line1}</text>
+            <text x="210" y="118" text-anchor="middle" fill="#e879f9" font-family="JetBrains Mono" font-weight="bold" font-size="13">${line2}</text>
+            <text x="210" y="146" text-anchor="middle" fill="#f59e0b" font-family="JetBrains Mono" font-size="11">[ ASCII + ESPELHO ]</text>
+          `;
+          hints = [
+            'Primeiro converta os bytes ASCII para letras; você obterá a palavra invertida.',
+            `O texto ASCII decodificado é "${rev}". Agora leia de trás para frente!`,
+            maskHint
+          ];
+          method = `Decodificar ASCII ("${rev}") e inverter -> ${w}.`;
+          break;
+        }
+        case 'vigenere': {
+          const enc = vigenereEncode(w, spec.vKey);
+          svgInner = `
+            <text x="210" y="96" text-anchor="middle" fill="#f59e0b" font-family="JetBrains Mono" font-weight="bold" font-size="24" letter-spacing="4">${enc}</text>
+            <text x="210" y="132" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono" font-weight="bold" font-size="14">CHAVE VIGENÈRE: "${spec.vKey}"</text>
+          `;
+          hints = [
+            `Subtraia o valor de cada letra da chave "${spec.vKey}" (A=0, B=1...) das letras de "${enc}".`,
+            `Usando a tabela Vigenère com chave "${spec.vKey}", "${enc}" revela uma palavra de ${w.length} letras.`,
+            maskHint
+          ];
+          method = `Decodificação Vigenère("${enc}", chave="${spec.vKey}") -> ${w}.`;
+          break;
+        }
+        case 'atbash': {
+          const enc = atbashTransform(w);
+          svgInner = `
+            <text x="210" y="102" text-anchor="middle" fill="#e879f9" font-family="JetBrains Mono" font-weight="bold" font-size="26" letter-spacing="4">${enc}</text>
+            <text x="210" y="136" text-anchor="middle" fill="#94a3b8" font-family="JetBrains Mono" font-size="12">ATBASH: A↔Z • B↔Y • C↔X</text>
+          `;
+          hints = [
+            'Inverta o alfabeto: Z vira A, Y vira B, X vira C...',
+            `Aplicando Atbash em "${enc}", cada letra espelha sua posição no alfabeto.`,
+            maskHint
+          ];
+          method = `Cifra Atbash sobre "${enc}" -> ${w}.`;
+          break;
+        }
+        case 'dual_red_source':
+        case 'dual_cyan_source': {
+          const isRed = spec.mode === 'dual_red_source';
+          const splitIdx = Math.ceil(w.length / 2);
+          const part1 = w.slice(0, splitIdx);
+          const part2 = w.slice(splitIdx);
+          radarTool = 'lens';
+          sourceHtml = `<!-- FRAGMENTO 2 DE 2 -->\n<fragment part="2" total="2">\n  <suffix>${part2}</suffix>\n</fragment>`;
+          svgInner = `
+            <g class="stego-cover">
+              <rect x="95" y="68" width="230" height="78" rx="12" fill="none" stroke="#64748b" stroke-width="3"/>
+              <text x="210" y="112" text-anchor="middle" fill="#64748b" font-family="JetBrains Mono" font-size="13">[ FRAGMENTO 1 OCULTO NA LENTE ]</text>
+            </g>
+            <g class="${isRed ? 'stego-red' : 'stego-cyan'}">
+              <text x="210" y="116" text-anchor="middle" fill="${isRed ? '#ff2a55' : '#00f0ff'}" font-family="JetBrains Mono" font-weight="800" font-size="30" letter-spacing="5">${part1}...</text>
+            </g>
+          `;
+          hints = [
+            `Use a Lente ${isRed ? 'Vermelha' : 'Ciana'} para ver o início da palavra e o </> Código-Fonte para ver o final.`,
+            `Parte 1 (Lente): "${part1}" + Parte 2 (Código-Fonte): "${part2}".`,
+            maskHint
+          ];
+          method = `Combinar Lente ${isRed ? 'Vermelha' : 'Ciana'} ("${part1}") + Código-Fonte ("${part2}") -> ${w}.`;
+          break;
+        }
+      }
+
+      return registerCaseRecord({
+        id,
+        difficulty,
+        category: spec.cat,
+        title: spec.title || `${spec.cat} #${padId}`,
+        url,
+        plainUrlAnswer,
+        prompt: spec.desc,
+        subNote,
+        radarTool,
+        morseWord,
+        plainAnswer: w,
+        hints,
+        method,
+        sourceHtml,
+        svg: svgCard(svgInner, `ARQUIVO #${String(id).padStart(3, '0')} • ${difficulty.toUpperCase()}`)
+      });
+    }
+
+    // 7. PERSISTENT PLAYER STATE
+    const STORAGE_KEY = 'enigma_io_sha256_v2';
+
+    let state = {
+      profile: {
+        created: false,
+        name: 'Agente Zero',
+        avatarType: 'icon',
+        avatarValue: '🕵️'
+      },
+      coins: 100,
+      theme: 'noir',
+      currentCaseId: 1,
+      solvedCases: {},
+      unlockedHints: {},
+      purchasedItems: [],
+      equippedFrame: '',
+      notes: {},
+      muted: false,
+      seenHelp: false
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state = { ...state, ...parsed };
+          if (!state.solvedCases) state.solvedCases = {};
+          if (!state.unlockedHints) state.unlockedHints = {};
+          if (!Array.isArray(state.purchasedItems)) state.purchasedItems = [];
+          if (!state.notes) state.notes = {};
+        }
+      } catch (e) {}
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function hasUpgrade(id) {
+      return state.purchasedItems.includes(id);
+    }
+
+    function getCurrentCase() {
+      return CASES.find(c => c.id === state.currentCaseId) || CASES[0];
+    }
+
+    // 8. CASE RENDERING & FORENSIC TOOLS
+    let currentLensMode = 0;
+
+    function setLensMode(mode) {
+      currentLensMode = mode % 3;
+      const vp = document.getElementById('evidenceViewport');
+      const overlay = document.getElementById('spectralOverlay');
+      const pill = document.getElementById('lensStatusPill');
+      const lbl = document.getElementById('lblToolLens');
+
+      vp.classList.remove('lens-normal', 'lens-red', 'lens-cyan');
+
+      if (currentLensMode === 1) {
+        vp.classList.add('lens-red');
+        overlay.style.backgroundColor = 'rgba(225, 29, 72, 0.24)';
+        pill.textContent = 'LENTE: VERMELHA';
+        pill.classList.remove('hidden');
+        lbl.textContent = 'Lente: Vermelha';
+      } else if (currentLensMode === 2) {
+        vp.classList.add('lens-cyan');
+        overlay.style.backgroundColor = 'rgba(6, 182, 212, 0.24)';
+        pill.textContent = 'LENTE: CIANA';
+        pill.classList.remove('hidden');
+        lbl.textContent = 'Lente: Ciana';
+      } else {
+        vp.classList.add('lens-normal');
+        overlay.style.backgroundColor = 'transparent';
+        pill.classList.add('hidden');
+        lbl.textContent = 'Lente: Normal';
+      }
+    }
+
+    function renderCurrentCase() {
+      AudioEngine.stopMorse();
+      document.getElementById('lblToolAudio').textContent = 'Sinal Áudio';
+      document.getElementById('morseTranscript').classList.add('hidden');
+      setLensMode(0);
+
+      const c = getCurrentCase();
+      const isSolved = !!state.solvedCases[c.id];
+
+      document.getElementById('virtualUrlInput').value = c.url;
+      document.getElementById('caseCodeTag').textContent = `CASO #${String(c.id).padStart(2, '0')}`;
+      document.getElementById('caseCategoryTag').textContent = c.category;
+      document.getElementById('caseTitle').textContent = c.title;
+      document.getElementById('svgEvidenceContainer').innerHTML = c.svg;
+      document.getElementById('casePrompt').textContent = c.prompt;
+      document.getElementById('caseSubNote').textContent = c.subNote || '';
+      document.getElementById('targetHashPreview').textContent = `${c.answerHash.slice(0, 18)}...${c.answerHash.slice(-8)}`;
+
+      // Radar Upgrade Indicator
+      const radarEl = document.getElementById('radarBadge');
+      if (hasUpgrade('clue_radar') && c.radarTool) {
+        const names = { lens: 'Lente Espectral', source: 'Código-Fonte', url: 'Barra de URL' };
+        radarEl.textContent = `📡 Radar: Use ${names[c.radarTool] || 'Ferramenta'}`;
+        radarEl.classList.remove('hidden');
+      } else {
+        radarEl.classList.add('hidden');
+      }
+
+      const audioBtn = document.getElementById('btnToolAudio');
+      if (c.morseWord) {
+        audioBtn.classList.add('ring-2', 'ring-amber-400/60');
+      } else {
+        audioBtn.classList.remove('ring-2', 'ring-amber-400/60');
+      }
+
+      const inputEl = document.getElementById('answerInput');
+      const solvedPill = document.getElementById('solvedBadgePill');
+      const feedbackEl = document.getElementById('feedbackMsg');
+      feedbackEl.classList.add('hidden');
+
+      if (isSolved) {
+        inputEl.value = '';
+        inputEl.placeholder = '✓ Caso já autenticado (digite para revalidar)';
+        solvedPill.classList.remove('hidden');
+      } else {
+        inputEl.value = '';
+        inputEl.placeholder = 'Digite a resposta...';
+        solvedPill.classList.add('hidden');
+      }
+
+      document.getElementById('scratchpadInput').value = state.notes[c.id] || '';
+
+      renderHintsPanel();
+      updateHeaderUI();
+    }
+
+    function getHintCost(tierIdx) {
+      const base = [10, 25, 50][tierIdx];
+      return hasUpgrade('hint_discount') ? Math.max(5, Math.round(base * 0.8)) : base;
+    }
+
+    function renderHintsPanel() {
+      const c = getCurrentCase();
+      const unlocked = state.unlockedHints[c.id] || [];
+
+      document.getElementById('discountTag').classList.toggle('hidden', !hasUpgrade('hint_discount'));
+
+      [0, 1, 2].forEach(idx => {
+        const btn = document.getElementById(`btnHint${idx + 1}`);
+        const costEl = document.getElementById(`costHint${idx + 1}`);
+        const isOpen = unlocked.includes(idx);
+        costEl.textContent = isOpen ? '✓ Aberta' : `${getHintCost(idx)} 🪙`;
+        btn.disabled = isOpen;
+      });
+
+      const feed = document.getElementById('hintsFeed');
+      if (unlocked.length === 0) {
+        feed.innerHTML = `<div class="p-2.5 rounded-xl bg-white/5 border border-white/10 opacity-65 italic">Nenhuma dica desbloqueada para este arquivo ainda.</div>`;
+        return;
+      }
+
+      feed.innerHTML = unlocked
+        .sort((a, b) => a - b)
+        .map(idx => `
+          <div class="p-2.5 rounded-xl bg-amber-500/15 border border-amber-400/35 text-amber-100">
+            <span class="font-code font-bold text-[10px] uppercase text-amber-300">Dica ${idx + 1}:</span>
+            <p class="mt-0.5 leading-snug">${escapeHtml(c.hints[idx])}</p>
+          </div>
+        `)
+        .join('');
+    }
+
+    function unlockHint(tierIdx) {
+      const c = getCurrentCase();
+      if (!state.unlockedHints[c.id]) state.unlockedHints[c.id] = [];
+      if (state.unlockedHints[c.id].includes(tierIdx)) return;
+
+      const cost = getHintCost(tierIdx);
+      if (state.coins < cost) {
+        AudioEngine.error();
+        showFeedback('Moedas insuficientes para esta dica! Resolva casos anteriores para ganhar 🪙.', 'error');
+        return;
+      }
+
+      state.coins -= cost;
+      state.unlockedHints[c.id].push(tierIdx);
+      saveState();
+      AudioEngine.hint();
+      updateHeaderUI();
+      renderHintsPanel();
+      const feed = document.getElementById('hintsFeed');
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function showFeedback(text, type = 'error') {
+      const el = document.getElementById('feedbackMsg');
+      el.textContent = text;
+      el.classList.remove('hidden', 'bg-rose-500/20', 'text-rose-200', 'border', 'border-rose-400/40', 'bg-emerald-500/20', 'text-emerald-200', 'border-emerald-400/40');
+      if (type === 'error') {
+        el.classList.add('bg-rose-500/20', 'text-rose-200', 'border', 'border-rose-400/40');
+        const box = document.getElementById('answerCardBox');
+        box.classList.remove('shake-box');
+        void box.offsetWidth;
+        box.classList.add('shake-box');
+      } else {
+        el.classList.add('bg-emerald-500/20', 'text-emerald-200', 'border', 'border-emerald-400/40');
+      }
+    }
+
+    function handleCaseSolved(c) {
+      // Ignore duplicate triggers while the celebration modal is already open
+      if (!document.getElementById('solvedModal').classList.contains('hidden')) return;
+      AudioEngine.solved();
+      const alreadySolved = !!state.solvedCases[c.id];
+      const baseReward = c.difficulty === 'Iniciado' ? 25 : c.difficulty === 'Decifrador' ? 40 : 60;
+      const mult = hasUpgrade('double_coins') ? 2 : 1;
+      // Re-validating a solved case pays nothing (previously +5 each time = infinite coins)
+      const earned = alreadySolved ? 0 : baseReward * mult;
+
+      state.coins += earned;
+      state.solvedCases[c.id] = true;
+      saveState();
+      updateHeaderUI();
+
+      spawnSticker(`🔓 Caso #${String(c.id).padStart(2, '0')} Autenticado!`, window.innerWidth / 2, window.innerHeight * 0.34);
+
+      document.getElementById('solvedModalTitle').textContent = `Arquivo #${String(c.id).padStart(2, '0')}: ${c.title}`;
+      document.getElementById('solvedModalExplanation').textContent = `Assinatura SHA-256 verificada (${c.answerHash.slice(0, 14)}...).`;
+      document.getElementById('solvedRewardCoins').textContent = alreadySolved ? 'Caso já resolvido antes' : `+${earned} 🪙`;
+      document.getElementById('answerInput').value = '';
+      document.getElementById('feedbackMsg').classList.add('hidden');
+      document.getElementById('solvedBadgePill').classList.remove('hidden');
+      const allDone = CASES.every(x => state.solvedCases[x.id]);
+      document.getElementById('btnProceedNextCase').textContent = allDone ? '🏆 Todos os 90 casos resolvidos!' : 'Próximo Arquivo ➔';
+      document.getElementById('solvedModal').classList.remove('hidden');
+      document.getElementById('btnProceedNextCase').focus();
+    }
+
+    async function validateSubmittedAnswer(rawValue) {
+      const c = getCurrentCase();
+      const cleanUser = CryptoVault.normalizeInput(rawValue);
+
+      if (!cleanUser) {
+        AudioEngine.error();
+        showFeedback('Digite uma palavra-chave antes de validar.', 'error');
+        return;
+      }
+
+      const candidateHash = await CryptoVault.computeSaltedHash(c.id, cleanUser);
+      if (candidateHash === c.answerHash) {
+        handleCaseSolved(c);
+      } else {
+        AudioEngine.error();
+        showFeedback('❌ Resposta incorreta. Revise a pista, use as ferramentas ou peça uma dica 💡.', 'error');
+      }
+    }
+
+    async function validateVirtualUrl() {
+      const c = getCurrentCase();
+      const rawUrl = document.getElementById('virtualUrlInput').value;
+      const candidateUrlHash = await CryptoVault.computeSaltedHash(c.id, rawUrl);
+
+      if (c.urlHash && candidateUrlHash === c.urlHash) {
+        handleCaseSolved(c);
+        return;
+      }
+
+      // Also check if the last path segment matches the case answer hash
+      const parts = rawUrl.split('/').filter(Boolean);
+      const lastSegment = parts[parts.length - 1] || '';
+      const lastSegHash = await CryptoVault.computeSaltedHash(c.id, lastSegment);
+      if (lastSegHash === c.answerHash) {
+        handleCaseSolved(c);
+        return;
+      }
+
+      AudioEngine.error();
+      showFeedback('🌐 404 — Endereço não encontrado. Troque só a última palavra da barra (depois da última /) e toque em IR.', 'error');
+    }
+
+    // 9. HEADER UI & STICKERS
+    function updateHeaderUI() {
+      const c = getCurrentCase();
+      const solvedCount = Object.keys(state.solvedCases).length;
+
+      document.getElementById('headerCoins').textContent = state.coins;
+      document.getElementById('headerAgentName').textContent = state.profile.name || 'Agente Zero';
+      document.getElementById('headerSolvedCount').textContent = `${solvedCount}/90 Casos`;
+      document.getElementById('headerCaseTitle').textContent = `Caso ${String(c.id).padStart(2, '0')}/90`;
+
+      const avatarWrap = document.getElementById('headerAvatarWrapper');
+      const frameItem = SHOP_ITEMS.find(i => i.id === state.equippedFrame);
+      avatarWrap.className = `w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-slate-900 text-lg ring-2 transition ${frameItem ? frameItem.ringClass : 'ring-sky-400/50'}`;
+
+      if (state.profile.avatarType === 'image' && state.profile.avatarValue) {
+        avatarWrap.innerHTML = `<img src="${state.profile.avatarValue}" class="w-full h-full object-cover" alt="Avatar" />`;
+      } else {
+        avatarWrap.textContent = state.profile.avatarValue || '🕵️';
+      }
+
+      const tierBadge = document.getElementById('headerTierBadge');
+      tierBadge.textContent = c.difficulty;
+      tierBadge.className = 'px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider font-extrabold border ';
+      if (c.difficulty === 'Iniciado') {
+        tierBadge.className += 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30';
+      } else if (c.difficulty === 'Decifrador') {
+        tierBadge.className += 'bg-amber-500/20 text-amber-300 border-amber-400/30';
+      } else {
+        tierBadge.className += 'bg-rose-500/20 text-rose-300 border-rose-400/30';
+      }
+
+      document.documentElement.setAttribute('data-theme', state.theme);
+      document.getElementById('themeSelect').value = state.theme;
+    }
+
+    function spawnSticker(text, x, y) {
+      AudioEngine.sticker();
+      const el = document.createElement('div');
+      el.className = 'floating-sticker px-4 py-2 rounded-2xl bg-slate-950/95 border-2 border-sky-400/70 text-white font-bold text-xs sm:text-sm shadow-2xl whitespace-nowrap';
+      el.textContent = text;
+      el.style.left = `${Math.min(window.innerWidth - 115, Math.max(115, x))}px`;
+      el.style.top = `${Math.max(75, y)}px`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1950);
+    }
+
+    document.querySelectorAll('.sticker-trigger').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const rect = btn.getBoundingClientRect();
+        spawnSticker(btn.getAttribute('data-sticker'), rect.left + rect.width / 2, rect.top - 10);
+      });
+    });
+
+    // 10. LOCAL PROFILE MODAL (CAMERA + GALLERY + 8 AVATARS)
+    let draftAvatarType = 'icon';
+    let draftAvatarValue = '🕵️';
+    let camStream = null;
+
+    function stopProfileCamera() {
+      if (camStream) {
+        camStream.getTracks().forEach(t => t.stop());
+        camStream = null;
+      }
+      document.getElementById('profileCameraVideo').classList.add('hidden');
+      document.getElementById('profileCameraControls').classList.add('hidden');
+    }
+
+    function syncProfilePreview() {
+      const emojiEl = document.getElementById('profileEmojiPreview');
+      const imgEl = document.getElementById('profileImgPreview');
+      if (draftAvatarType === 'image' && draftAvatarValue) {
+        emojiEl.classList.add('hidden');
+        imgEl.src = draftAvatarValue;
+        imgEl.classList.remove('hidden');
+      } else {
+        imgEl.classList.add('hidden');
+        emojiEl.textContent = draftAvatarValue || '🕵️';
+        emojiEl.classList.remove('hidden');
+      }
+    }
+
+    function openProfileModal() {
+      draftAvatarType = state.profile.avatarType || 'icon';
+      draftAvatarValue = state.profile.avatarValue || '🕵️';
+      document.getElementById('inputAgentName').value = state.profile.name || '';
+      document.getElementById('cameraStatusError').classList.add('hidden');
+      stopProfileCamera();
+      syncProfilePreview();
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
+
+    document.getElementById('btnOpenProfile').addEventListener('click', openProfileModal);
+
+    document.querySelectorAll('.avatar-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        stopProfileCamera();
+        draftAvatarType = 'icon';
+        draftAvatarValue = btn.getAttribute('data-avatar');
+        syncProfilePreview();
+        AudioEngine.click();
+      });
+    });
+
+    document.getElementById('btnTabAvatars').addEventListener('click', () => {
+      stopProfileCamera();
+      syncProfilePreview();
+    });
+
+    document.getElementById('btnTabCamera').addEventListener('click', async () => {
+      const errEl = document.getElementById('cameraStatusError');
+      errEl.classList.add('hidden');
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Sem câmera');
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 256, height: 256 } });
+        camStream = stream;
+        const vid = document.getElementById('profileCameraVideo');
+        vid.srcObject = stream;
+        document.getElementById('profileEmojiPreview').classList.add('hidden');
+        document.getElementById('profileImgPreview').classList.add('hidden');
+        vid.classList.remove('hidden');
+        document.getElementById('profileCameraControls').classList.remove('hidden');
+      } catch (err) {
+        errEl.textContent = '⚠️ Câmera indisponível neste navegador/iFrame. Escolha um avatar ou foto da galeria!';
+        errEl.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('btnSnapCamera').addEventListener('click', () => {
+      const vid = document.getElementById('profileCameraVideo');
+      if (!vid || !camStream) return;
+      const c = document.createElement('canvas');
+      c.width = 160;
+      c.height = 160;
+      const cx = c.getContext('2d');
+      cx.translate(160, 0);
+      cx.scale(-1, 1);
+      cx.drawImage(vid, 0, 0, 160, 160);
+      draftAvatarType = 'image';
+      draftAvatarValue = c.toDataURL('image/jpeg', 0.82);
+      stopProfileCamera();
+      syncProfilePreview();
+      AudioEngine.hint();
+    });
+
+    document.getElementById('btnStopCamera').addEventListener('click', () => {
+      stopProfileCamera();
+      syncProfilePreview();
+    });
+
+    document.getElementById('inputGalleryUpload').addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      stopProfileCamera();
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = 160;
+          c.height = 160;
+          const cx = c.getContext('2d');
+          const min = Math.min(img.width, img.height);
+          cx.drawImage(img, (img.width - min) / 2, (img.height - min) / 2, min, min, 0, 0, 160, 160);
+          draftAvatarType = 'image';
+          draftAvatarValue = c.toDataURL('image/jpeg', 0.82);
+          syncProfilePreview();
+          AudioEngine.hint();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('btnConfirmProfile').addEventListener('click', () => {
+      const val = document.getElementById('inputAgentName').value.trim();
+      state.profile = {
+        created: true,
+        name: val || 'Agente Zero',
+        avatarType: draftAvatarType,
+        avatarValue: draftAvatarValue
+      };
+      stopProfileCamera();
+      saveState();
+      updateHeaderUI();
+      document.getElementById('profileModal').classList.add('hidden');
+      AudioEngine.solved();
+    });
+
+    // 11. 90-CASE GRID DIRECTORY MODAL
+    let activeTierTab = 'Iniciado';
+
+    function renderCasesDirectory() {
+      const solvedTotal = Object.keys(state.solvedCases).length;
+      document.getElementById('casesProgressSummary').textContent = `Progresso Total: ${solvedTotal}/90 decifrados`;
+
+      document.querySelectorAll('.tier-tab-btn').forEach(btn => {
+        const isSel = btn.getAttribute('data-tier-tab') === activeTierTab;
+        btn.className = `tier-tab-btn btn-tactile py-2 rounded-xl font-bold text-xs sm:text-sm border transition ${
+          isSel ? 'bg-sky-500/25 border-sky-400 text-sky-200' : 'bg-white/5 border-white/10 opacity-70'
+        }`;
+      });
+
+      const grid = document.getElementById('casesGridContainer');
+      grid.innerHTML = '';
+
+      CASES.filter(c => c.difficulty === activeTierTab).forEach(c => {
+        const solved = !!state.solvedCases[c.id];
+        const current = c.id === state.currentCaseId;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `btn-tactile p-2.5 rounded-2xl border flex flex-col items-center justify-center text-center transition ${
+          current
+            ? 'bg-sky-500/30 border-sky-400 ring-2 ring-sky-400/50'
+            : solved
+              ? 'bg-emerald-500/15 border-emerald-400/40'
+              : 'bg-black/40 border-white/10 hover:border-white/30'
+        }`;
+        btn.innerHTML = `
+          <span class="font-code text-sm font-extrabold">${String(c.id).padStart(2, '0')}</span>
+          <span class="text-[11px] mt-0.5">${solved ? '✅' : current ? '▶' : '·'}</span>
+          <span class="text-[9px] opacity-70 truncate w-full mt-0.5">${escapeHtml(c.title)}</span>
+        `;
+        btn.addEventListener('click', () => {
+          state.currentCaseId = c.id;
+          saveState();
+          renderCurrentCase();
+          document.getElementById('casesModal').classList.add('hidden');
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    document.getElementById('btnOpenCases').addEventListener('click', () => {
+      activeTierTab = getCurrentCase().difficulty;
+      renderCasesDirectory();
+      document.getElementById('casesModal').classList.remove('hidden');
+    });
+    document.getElementById('btnCloseCases').addEventListener('click', () => {
+      document.getElementById('casesModal').classList.add('hidden');
+    });
+    document.getElementById('btnJumpUnsolved').addEventListener('click', () => {
+      const next = CASES.find(c => !state.solvedCases[c.id]) || CASES[0];
+      state.currentCaseId = next.id;
+      saveState();
+      renderCurrentCase();
+      document.getElementById('casesModal').classList.add('hidden');
+    });
+    document.querySelectorAll('.tier-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeTierTab = btn.getAttribute('data-tier-tab');
+        renderCasesDirectory();
+      });
+    });
+
+    // 12. FORENSIC SHOP MODAL
+    function renderShop() {
+      document.getElementById('shopCoinsDisplay').textContent = state.coins;
+      const container = document.getElementById('shopItemsContainer');
+      container.innerHTML = '';
+
+      SHOP_ITEMS.forEach(item => {
+        const owned = state.purchasedItems.includes(item.id);
+        const equipped = item.type === 'frame' && state.equippedFrame === item.id;
+
+        const card = document.createElement('div');
+        card.className = `p-3.5 rounded-2xl border flex flex-col justify-between gap-2.5 ${
+          equipped ? 'bg-amber-500/20 border-amber-400' : owned ? 'bg-emerald-500/15 border-emerald-400/40' : 'bg-black/45 border-white/15'
+        }`;
+        card.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center text-2xl shrink-0">${item.icon}</div>
+            <div>
+              <div class="font-bold text-sm">${item.name}</div>
+              <p class="text-[11px] opacity-75 leading-snug mt-0.5">${item.desc}</p>
+            </div>
+          </div>
+          <button type="button" class="shop-buy-btn btn-tactile w-full py-2 rounded-xl font-bold text-xs ${
+            equipped
+              ? 'bg-amber-400 text-slate-950'
+              : owned
+                ? 'bg-emerald-400/25 text-emerald-200 border border-emerald-400/40'
+                : 'bg-amber-500/25 hover:bg-amber-500/40 border border-amber-400/40 text-amber-300'
+          }">
+            ${equipped ? '✓ Moldura Equipada' : owned ? (item.type === 'frame' ? 'Equipar Moldura' : '✓ Ativo') : `Adquirir (${item.price} 🪙)`}
+          </button>
+        `;
+
+        card.querySelector('.shop-buy-btn').addEventListener('click', () => {
+          if (owned) {
+            if (item.type === 'frame') {
+              state.equippedFrame = equipped ? '' : item.id;
+              saveState();
+              updateHeaderUI();
+              renderShop();
+              AudioEngine.click();
+            }
+            return;
+          }
+
+          if (state.coins < item.price) {
+            AudioEngine.error();
+            spawnSticker('🪙 Moedas Insuficientes!', window.innerWidth / 2, window.innerHeight * 0.35);
+            return;
+          }
+
+          state.coins -= item.price;
+          state.purchasedItems.push(item.id);
+          if (item.type === 'frame') state.equippedFrame = item.id;
+          saveState();
+          updateHeaderUI();
+          renderCurrentCase();
+          renderShop();
+          AudioEngine.solved();
+          spawnSticker(`${item.icon} ${item.name} Adquirido!`, window.innerWidth / 2, window.innerHeight * 0.35);
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    document.getElementById('btnOpenShop').addEventListener('click', () => {
+      renderShop();
+      document.getElementById('shopModal').classList.remove('hidden');
+    });
+    document.getElementById('btnCloseShop').addEventListener('click', () => {
+      document.getElementById('shopModal').classList.add('hidden');
+    });
+
+    // 13. MOBILE & DESKTOP LONG-PRESS VALIDATION FOR CURRENT RIDDLE ONLY
+    /* === DEV_VALIDATION_MODULE_START === */
+    (function setupCurrentCaseLongPressValidation() {
+      const holdBtn = document.getElementById('caseBadgeHoldBtn');
+      const holdFill = document.getElementById('caseBadgeHoldFill');
+      // Players must never see answers by accident: long-press only works with ?dev=1
+      if (!DEV_MODE || !holdBtn || !holdFill) return;
+      holdBtn.title = 'DEV: segure 0.65s para ver a solução deste caso';
+      holdBtn.classList.replace('cursor-default', 'cursor-pointer');
+
+      const HOLD_DURATION_MS = 650;
+      let holdRaf = null;
+      let holdStart = 0;
+
+      function openCurrentCaseSolutionModal() {
+        const c = getCurrentCase();
+        const vaultEntry = DEV_TEST_VAULT[c.id] || { answer: '---', urlAnswer: '', method: '' };
+
+        document.getElementById('debugSingleCaseLabel').textContent = `CASO #${String(c.id).padStart(2, '0')} — ${c.title} (${c.difficulty})`;
+        document.getElementById('debugSingleAnswer').textContent = vaultEntry.answer;
+        document.getElementById('debugSingleUrlHint').textContent = vaultEntry.urlAnswer ? `URL Alternativa: ${vaultEntry.urlAnswer}` : '';
+        document.getElementById('debugSingleMethod').textContent = vaultEntry.method;
+        document.getElementById('debugSingleHash').textContent = c.answerHash;
+        document.getElementById('singleCaseDebugModal').classList.remove('hidden');
+        AudioEngine.hint();
+      }
+
+      function cancelHold() {
+        if (holdRaf) {
+          cancelAnimationFrame(holdRaf);
+          holdRaf = null;
+        }
+        holdFill.style.width = '0%';
+      }
+
+      function startHold(e) {
+        if (e.type === 'mousedown' && e.button !== 0) return;
+        cancelHold();
+        holdStart = performance.now();
+
+        function tick(now) {
+          const pct = Math.min(100, ((now - holdStart) / HOLD_DURATION_MS) * 100);
+          holdFill.style.width = `${pct}%`;
+          if (pct >= 100) {
+            holdRaf = null;
+            holdFill.style.width = '0%';
+            openCurrentCaseSolutionModal();
+          } else {
+            holdRaf = requestAnimationFrame(tick);
+          }
+        }
+        holdRaf = requestAnimationFrame(tick);
+      }
+
+      holdBtn.addEventListener('mousedown', startHold);
+      holdBtn.addEventListener('touchstart', startHold, { passive: true });
+      ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(evt => {
+        holdBtn.addEventListener(evt, cancelHold);
+      });
+
+      document.getElementById('btnCloseSingleDebug').addEventListener('click', () => {
+        document.getElementById('singleCaseDebugModal').classList.add('hidden');
+      });
+
+      document.getElementById('btnDebugFillCurrent').addEventListener('click', () => {
+        const c = getCurrentCase();
+        const vaultEntry = DEV_TEST_VAULT[c.id];
+        if (vaultEntry) {
+          document.getElementById('answerInput').value = vaultEntry.answer;
+          if (vaultEntry.urlAnswer) {
+            document.getElementById('virtualUrlInput').value = vaultEntry.urlAnswer;
+          }
+        }
+        document.getElementById('singleCaseDebugModal').classList.add('hidden');
+        AudioEngine.click();
+      });
+
+      // Exports a clean, hardened production index.html for GitHub Pages with all plaintext answers stripped out
+      document.getElementById('btnExportHardenedHtml').addEventListener('click', () => {
+        try {
+          const serializedCases = JSON.stringify(CASES);
+          let docHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+          // Strip the dev validation modal HTML
+          docHtml = docHtml.replace(/<div id="singleCaseDebugModal"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/, '');
+          // Strip DEV_TEST_VAULT blocks
+          docHtml = docHtml.replace(/\/\* === DEV_TEST_VAULT_START === \*\/[\s\S]*?\/\* === DEV_TEST_VAULT_END === \*\//g, '');
+          // Strip DEV_VALIDATION_MODULE block
+          docHtml = docHtml.replace(/\/\* === DEV_VALIDATION_MODULE_START === \*\/[\s\S]*?\/\* === DEV_VALIDATION_MODULE_END === \*\//g, '');
+          // Replace the dynamic CASES builder with pre-computed SHA-256 hash records only
+          docHtml = docHtml.replace(/const CASES = \(\(\) => \{[\s\S]*?\}\)\(\);/, `const CASES = ${serializedCases};`);
+
+          const blob = new Blob([docHtml], { type: 'text/html;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'index.html';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          spawnSticker('📦 index.html Blindado Exportado!', window.innerWidth / 2, window.innerHeight * 0.35);
+        } catch (err) {
+          AudioEngine.error();
+        }
+      });
+    })();
+    /* === DEV_VALIDATION_MODULE_END === */
+
+    // 14. (Removed) DevTools size heuristic: it fired on browser zoom / side panels and scared regular players.
+
+    // 15. WIRE FORENSIC TOOLS & NAVIGATION EVENTS
+    document.getElementById('answerForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      validateSubmittedAnswer(document.getElementById('answerInput').value);
+    });
+
+    document.getElementById('btnGoUrl').addEventListener('click', validateVirtualUrl);
+    document.getElementById('virtualUrlInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        validateVirtualUrl();
+      }
+    });
+
+    document.getElementById('btnToolLens').addEventListener('click', () => {
+      setLensMode(currentLensMode + 1);
+      AudioEngine.lens();
+    });
+
+    document.getElementById('btnToolSource').addEventListener('click', () => {
+      const c = getCurrentCase();
+      document.getElementById('sourceModalTitle').textContent = `Código-Fonte & EXIF — Caso #${String(c.id).padStart(2, '0')}`;
+      document.getElementById('sourceCodeContent').textContent = c.sourceHtml;
+      document.getElementById('sourceModal').classList.remove('hidden');
+      AudioEngine.click();
+    });
+    document.getElementById('btnCloseSource').addEventListener('click', () => {
+      document.getElementById('sourceModal').classList.add('hidden');
+    });
+
+    document.getElementById('btnToolAudio').addEventListener('click', () => {
+      const c = getCurrentCase();
+      const lbl = document.getElementById('lblToolAudio');
+      if (!c.morseWord) {
+        AudioEngine.click();
+        showFeedback('Nenhuma transmissão de rádio/Morse detectada neste arquivo.', 'error');
+        return;
+      }
+      // Written transcript: keeps Morse cases solvable without sound (muted, no speakers, hearing impaired)
+      const transcript = document.getElementById('morseTranscript');
+      transcript.textContent = `📡 Sinal captado: ${AudioEngine.toMorseText(c.morseWord)}   (use a 📖 Tabela Morse)`;
+      transcript.classList.remove('hidden');
+
+      lbl.textContent = AudioEngine.isMuted() ? 'Som desligado' : 'Transmitindo...';
+      AudioEngine.playMorseWord(c.morseWord, (isOn, sym) => {
+        if (sym === 'DONE') {
+          lbl.textContent = 'Ouvir de novo';
+        } else {
+          lbl.textContent = isOn ? `[ ${sym === '-' ? '—' : '•'} ]` : '...';
+        }
+      });
+    });
+
+    document.getElementById('btnToolNotes').addEventListener('click', () => {
+      document.getElementById('scratchpadDrawer').classList.toggle('hidden');
+      AudioEngine.click();
+    });
+    document.getElementById('scratchpadInput').addEventListener('input', (e) => {
+      const c = getCurrentCase();
+      state.notes[c.id] = e.target.value;
+      saveState();
+    });
+    document.getElementById('btnClearNotes').addEventListener('click', () => {
+      const c = getCurrentCase();
+      state.notes[c.id] = '';
+      document.getElementById('scratchpadInput').value = '';
+      saveState();
+    });
+
+    document.getElementById('btnHint1').addEventListener('click', () => unlockHint(0));
+    document.getElementById('btnHint2').addEventListener('click', () => unlockHint(1));
+    document.getElementById('btnHint3').addEventListener('click', () => unlockHint(2));
+
+    document.getElementById('btnOpenCipherTable').addEventListener('click', () => {
+      document.getElementById('cipherModal').classList.remove('hidden');
+      AudioEngine.click();
+    });
+    document.getElementById('btnCloseCipher').addEventListener('click', () => {
+      document.getElementById('cipherModal').classList.add('hidden');
+    });
+
+    document.getElementById('btnPrevCase').addEventListener('click', () => {
+      state.currentCaseId = state.currentCaseId > 1 ? state.currentCaseId - 1 : CASES.length;
+      saveState();
+      renderCurrentCase();
+      AudioEngine.click();
+    });
+    document.getElementById('btnNextCaseNav').addEventListener('click', () => {
+      state.currentCaseId = state.currentCaseId < CASES.length ? state.currentCaseId + 1 : 1;
+      saveState();
+      renderCurrentCase();
+      AudioEngine.click();
+    });
+
+    document.getElementById('btnProceedNextCase').addEventListener('click', () => {
+      document.getElementById('solvedModal').classList.add('hidden');
+      // Go to the next UNSOLVED case after the current one (wrapping), or simply the next one if all are solved
+      const cur = state.currentCaseId;
+      const ordered = CASES.slice(cur).concat(CASES.slice(0, cur));
+      const next = ordered.find(x => !state.solvedCases[x.id]) || ordered[0];
+      state.currentCaseId = next.id;
+      saveState();
+      renderCurrentCase();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    document.getElementById('themeSelect').addEventListener('change', (e) => {
+      state.theme = e.target.value;
+      saveState();
+      updateHeaderUI();
+      AudioEngine.click();
+    });
+
+    function syncSoundButton() {
+      document.getElementById('btnToggleSound').textContent = AudioEngine.isMuted() ? '🔇' : '🔊';
+    }
+
+    document.getElementById('btnToggleSound').addEventListener('click', () => {
+      state.muted = AudioEngine.toggleMute();
+      saveState();
+      syncSoundButton();
+      document.getElementById('lblToolAudio').textContent = 'Sinal Áudio';
+    });
+
+    // Hide stale error feedback as soon as the player edits the answer
+    document.getElementById('answerInput').addEventListener('input', () => {
+      document.getElementById('feedbackMsg').classList.add('hidden');
+    });
+
+    // HOW TO PLAY
+    function openHelpModal() {
+      document.getElementById('helpModal').classList.remove('hidden');
+    }
+    function closeHelpModal() {
+      document.getElementById('helpModal').classList.add('hidden');
+      if (!state.seenHelp) {
+        state.seenHelp = true;
+        saveState();
+      }
+    }
+    document.getElementById('btnOpenHelp').addEventListener('click', () => { openHelpModal(); AudioEngine.click(); });
+    document.getElementById('btnCloseHelp').addEventListener('click', closeHelpModal);
+    document.getElementById('btnHelpStart').addEventListener('click', closeHelpModal);
+
+    // Show the tutorial right after the first profile creation
+    document.getElementById('btnConfirmProfile').addEventListener('click', () => {
+      if (!state.seenHelp) openHelpModal();
+    });
+
+    // MODALS: close with Esc or by tapping the dark backdrop
+    const CLOSABLE_MODALS = {
+      casesModal: () => document.getElementById('casesModal').classList.add('hidden'),
+      sourceModal: () => document.getElementById('sourceModal').classList.add('hidden'),
+      shopModal: () => document.getElementById('shopModal').classList.add('hidden'),
+      cipherModal: () => document.getElementById('cipherModal').classList.add('hidden'),
+      singleCaseDebugModal: () => document.getElementById('singleCaseDebugModal').classList.add('hidden'),
+      helpModal: closeHelpModal,
+      solvedModal: () => document.getElementById('btnProceedNextCase').click(),
+      profileModal: () => {
+        // Only closable once the profile exists (first run must confirm a codename)
+        if (!state.profile.created) return;
+        stopProfileCamera();
+        document.getElementById('profileModal').classList.add('hidden');
+      }
+    };
+    Object.entries(CLOSABLE_MODALS).forEach(([id, close]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('click', (e) => { if (e.target === el) close(); });
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      // Close the top-most open modal (last in DOM order)
+      const open = Object.keys(CLOSABLE_MODALS)
+        .map(id => document.getElementById(id))
+        .filter(el => el && !el.classList.contains('hidden'));
+      if (open.length) {
+        const top = open.reduce((acc, el) => (acc.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING ? el : acc));
+        CLOSABLE_MODALS[top.id]();
+      }
+    });
+
+    // 16. BOOTSTRAP ON WINDOW LOAD
+    window.onload = function () {
+      loadState();
+      AudioEngine.setMuted(state.muted);
+      syncSoundButton();
+      renderCurrentCase();
+
+      if (!state.profile.created) {
+        openProfileModal();
+      } else if (!state.seenHelp) {
+        openHelpModal();
+      }
+    };
+  </script>
+</body>
+</html>
