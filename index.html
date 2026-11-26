@@ -768,7 +768,7 @@
         <li class="p-3 rounded-xl bg-black/40 border border-white/10"><strong>3. Barra de endereço.</strong> Em alguns casos você resolve trocando a última palavra do endereço (ex: <span class="font-code text-sky-300">/dia</span> → <span class="font-code text-sky-300">/noite</span>) e tocando em <strong>IR</strong>.</li>
         <li class="p-3 rounded-xl bg-black/40 border border-white/10"><strong>4. Responda.</strong> Digite a palavra no campo 🔐 e toque em <strong>VALIDAR</strong> (ou Enter). Acentos e maiúsculas não importam.</li>
         <li class="p-3 rounded-xl bg-black/40 border border-white/10"><strong>5. Travou?</strong> Compre uma das 3 dicas com moedas 🪙. Cada caso resolvido dá moedas, que também servem na Loja. A <strong>📖 Tabela Morse / A=1</strong> ajuda nas cifras.</li>
-        <li class="p-3 rounded-xl bg-black/40 border border-white/10"><strong>6. Navegue.</strong> Use ◀ ▶ ou o botão <strong>Caso 01/90</strong> no topo para escolher qualquer caso. Seu progresso fica salvo neste aparelho.</li>
+        <li class="p-3 rounded-xl bg-black/40 border border-white/10"><strong>6. Navegue.</strong> Os casos são liberados em ordem: resolva o atual para desbloquear o próximo. Use ◀ ▶ ou o botão <strong>Caso 01/90</strong> para revisitar casos já resolvidos. Seu progresso fica salvo neste aparelho.</li>
       </ol>
       <button id="btnHelpStart" type="button" class="btn-tactile w-full py-3 rounded-xl bg-gradient-to-r from-sky-400 to-cyan-300 text-slate-950 font-extrabold text-sm shadow-lg">
         Entendi, vamos jogar!
@@ -795,7 +795,9 @@
     })();
 
     // Dev-only tools (long-press answer reveal + hardened export). Enable by opening the page with ?dev=1
-    const DEV_MODE = new URLSearchParams(location.search).get('dev') === '1';
+    // Restricted to local development hosts so players cannot unlock it on the published site
+    const DEV_MODE = new URLSearchParams(location.search).get('dev') === '1'
+      && (location.protocol === 'file:' || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname));
 
     function escapeHtml(str) {
       return String(str)
@@ -1401,7 +1403,7 @@
         { word: 'BINARIO', cat: 'Linguagem de Máquina', desc: 'Zeros e uns formam códigos ASCII de 8 bits. Converta para texto.', mode: 'binary' },
         { word: 'ESPECTRO', cat: 'Esteganografia RGB', desc: 'Duas camadas se sobrepõem. Isole a frequência Ciana com a Lente Espectral.', mode: 'cyan' },
         { word: 'LABIRINTO', cat: 'Roteamento Oculto', desc: 'Você está em /beco. Encontre a saída alterando a URL para /labirinto.', mode: 'url', urlFrom: 'beco', urlTo: 'labirinto' },
-        { word: 'TELEMETRIA', cat: 'Auditoria de Rede', desc: 'Os pacotes do servidor escondem uma tag <secret> no Código-Fonte.', mode: 'source' },
+        { word: 'TELEMETRIA', cat: 'Auditoria de Rede', desc: 'Os pacotes do servidor escondem uma chave nos comentários do Código-Fonte.', mode: 'source' },
         { word: 'SATELITE', cat: 'Estação Orbital', desc: 'Transmissão Morse de alta altitude. Ouça ou decodifique os sinais.', mode: 'morse' },
         { word: 'QUIMERA', cat: 'Mitologia Cifrada', desc: 'Cada letra foi deslocada +3 posições no alfabeto.', mode: 'caesar3' },
         { word: 'ALGORITMO', cat: 'Lógica Computacional', desc: 'Inversão textual detectada no barramento.', mode: 'reverse' },
@@ -1450,20 +1452,20 @@
         { word: 'SIMETRIA', cat: 'Geometria Sagrada', desc: 'Metade na Lente Vermelha, metade no Código-Fonte.', mode: 'dual_red_source' },
         { word: 'ASTRONOMIA', cat: 'Cosmologia', desc: 'Cifra de Vigenère com chave "CEU".', mode: 'vigenere', vKey: 'CEU' },
         { word: 'GENESIS', cat: 'Origem Absoluta', desc: 'Binário invertido de 7 letras.', mode: 'binary_rev' },
-        { word: 'OBELISCO', cat: 'Monumento', desc: 'Cifra Atbash.', mode: 'atbash' },
+        { word: 'OBELISCO', cat: 'Monumento', desc: 'A inscrição do monumento foi gravada com o alfabeto espelhado (Atbash).', mode: 'atbash' },
         { word: 'TRANSCENDENCIA', cat: 'Elevação', desc: 'Troque /limite por /transcendencia na URL.', mode: 'url', urlFrom: 'limite', urlTo: 'transcendencia' },
         { word: 'CONSPIRACAO', cat: 'Arquivo Ultra-Secreto', desc: 'Vigenère com chave "REDE".', mode: 'vigenere', vKey: 'REDE' },
         { word: 'TELEPATIA', cat: 'Conexão Mental', desc: 'Metade na Lente Ciana + metade no Código-Fonte.', mode: 'dual_cyan_source' },
-        { word: 'ORACULO', cat: 'Profecia Digital', desc: 'Binário invertido.', mode: 'binary_rev' },
+        { word: 'ORACULO', cat: 'Profecia Digital', desc: 'A profecia chegou em bytes ASCII... e de trás para frente.', mode: 'binary_rev' },
         { word: 'ESFINGE', cat: 'Guardiã de Tebas', desc: 'Cifra Atbash (Z=A, Y=B...).', mode: 'atbash' },
         { word: 'CATACUMBA', cat: 'Subterrâneo', desc: 'Vigenère com chave "ECO".', mode: 'vigenere', vKey: 'ECO' },
         { word: 'ILLUMINATI', cat: 'Sociedade Oculta', desc: 'Metade Vermelha + metade Código-Fonte.', mode: 'dual_red_source' },
         { word: 'QUANTICO', cat: 'Superposição', desc: 'Binário invertido de 8 bytes.', mode: 'binary_rev' },
-        { word: 'APOCALIPSE', cat: 'Revelação', desc: 'Cifra Atbash.', mode: 'atbash' },
+        { word: 'APOCALIPSE', cat: 'Revelação', desc: 'O pergaminho da revelação troca cada letra pela sua oposta no alfabeto (Atbash).', mode: 'atbash' },
         { word: 'PANDORA', cat: 'A Caixa Selada', desc: 'Vigenère com chave "ABRIR".', mode: 'vigenere', vKey: 'ABRIR' },
         { word: 'ETERNO', cat: 'Tempo Infinito', desc: 'Metade Ciana + metade Código-Fonte.', mode: 'dual_cyan_source' },
-        { word: 'LEVIATA', cat: 'Abismo Profundo', desc: 'Binário invertido.', mode: 'binary_rev' },
-        { word: 'SOBERANO', cat: 'Penúltimo Selo', desc: 'Cifra Atbash.', mode: 'atbash' },
+        { word: 'LEVIATA', cat: 'Abismo Profundo', desc: 'Do abismo emergem 7 bytes invertidos: decodifique e leia ao contrário.', mode: 'binary_rev' },
+        { word: 'SOBERANO', cat: 'Penúltimo Selo', desc: 'O penúltimo selo usa Atbash: Z vira A, Y vira B, X vira C...', mode: 'atbash' },
         { word: 'ONISCIENCIA', cat: 'O Arquivo Final (90/90)', desc: 'O último selo do ENIGMA.IO: decodifique a Cifra de Vigenère com a chave "MESTRE".', mode: 'vigenere', vKey: 'MESTRE' }
       ];
 
@@ -1782,6 +1784,15 @@
           if (!state.unlockedHints) state.unlockedHints = {};
           if (!Array.isArray(state.purchasedItems)) state.purchasedItems = [];
           if (!state.notes) state.notes = {};
+          // Keep only real, boolean-true entries for known cases
+          const clean = {};
+          Object.keys(state.solvedCases).forEach(k => {
+            const id = Number(k);
+            if (state.solvedCases[k] === true && CASES.some(c => c.id === id)) clean[id] = true;
+          });
+          state.solvedCases = clean;
+          state.currentCaseId = Number(state.currentCaseId) || 1;
+          if (!isCaseUnlocked(state.currentCaseId)) state.currentCaseId = firstUnsolvedId();
         }
       } catch (e) {}
     }
@@ -1796,8 +1807,33 @@
       return state.purchasedItems.includes(id);
     }
 
+    // SEQUENTIAL PROGRESSION: a case is playable only if it was already solved
+    // or every case before it is solved (i.e. it is not past the first unsolved one).
+    function firstUnsolvedId() {
+      const c = CASES.find(x => !state.solvedCases[x.id]);
+      return c ? c.id : CASES.length;
+    }
+
+    function isCaseUnlocked(id) {
+      return !!state.solvedCases[id] || id <= firstUnsolvedId();
+    }
+
     function getCurrentCase() {
+      if (!isCaseUnlocked(state.currentCaseId)) state.currentCaseId = firstUnsolvedId();
       return CASES.find(c => c.id === state.currentCaseId) || CASES[0];
+    }
+
+    function goToCase(id) {
+      if (!CASES.some(c => c.id === id)) return false;
+      if (!isCaseUnlocked(id)) {
+        AudioEngine.error();
+        showFeedback('🔒 Arquivo bloqueado. Resolva o caso atual para liberar o próximo.', 'error');
+        return false;
+      }
+      state.currentCaseId = id;
+      saveState();
+      renderCurrentCase();
+      return true;
     }
 
     // 8. CASE RENDERING & FORENSIC TOOLS
@@ -1884,6 +1920,16 @@
 
       document.getElementById('scratchpadInput').value = state.notes[c.id] || '';
 
+      const prevBtn = document.getElementById('btnPrevCase');
+      const nextBtn = document.getElementById('btnNextCaseNav');
+      const canPrev = c.id > 1;
+      const canNext = c.id < CASES.length && isCaseUnlocked(c.id + 1);
+      prevBtn.disabled = !canPrev;
+      nextBtn.disabled = !canNext;
+      prevBtn.classList.toggle('opacity-35', !canPrev);
+      nextBtn.classList.toggle('opacity-35', !canNext);
+      nextBtn.title = canNext ? 'Próximo Caso' : '🔒 Resolva este caso para liberar o próximo';
+
       renderHintsPanel();
       updateHeaderUI();
     }
@@ -1964,6 +2010,7 @@
     function handleCaseSolved(c) {
       // Ignore duplicate triggers while the celebration modal is already open
       if (!document.getElementById('solvedModal').classList.contains('hidden')) return;
+      if (!isCaseUnlocked(c.id)) return;
       AudioEngine.solved();
       const alreadySolved = !!state.solvedCases[c.id];
       const baseReward = c.difficulty === 'Iniciado' ? 25 : c.difficulty === 'Decifrador' ? 40 : 60;
@@ -1992,6 +2039,7 @@
 
     async function validateSubmittedAnswer(rawValue) {
       const c = getCurrentCase();
+      if (!isCaseUnlocked(c.id)) return;
       const cleanUser = CryptoVault.normalizeInput(rawValue);
 
       if (!cleanUser) {
@@ -2011,6 +2059,7 @@
 
     async function validateVirtualUrl() {
       const c = getCurrentCase();
+      if (!isCaseUnlocked(c.id)) return;
       const rawUrl = document.getElementById('virtualUrlInput').value;
       const candidateUrlHash = await CryptoVault.computeSaltedHash(c.id, rawUrl);
 
@@ -2242,25 +2291,26 @@
       CASES.filter(c => c.difficulty === activeTierTab).forEach(c => {
         const solved = !!state.solvedCases[c.id];
         const current = c.id === state.currentCaseId;
+        const locked = !isCaseUnlocked(c.id);
         const btn = document.createElement('button');
         btn.type = 'button';
+        btn.disabled = locked;
         btn.className = `btn-tactile p-2.5 rounded-2xl border flex flex-col items-center justify-center text-center transition ${
           current
             ? 'bg-sky-500/30 border-sky-400 ring-2 ring-sky-400/50'
             : solved
               ? 'bg-emerald-500/15 border-emerald-400/40'
-              : 'bg-black/40 border-white/10 hover:border-white/30'
+              : locked
+                ? 'bg-black/40 border-white/5 opacity-40 cursor-not-allowed'
+                : 'bg-black/40 border-white/10 hover:border-white/30'
         }`;
         btn.innerHTML = `
           <span class="font-code text-sm font-extrabold">${String(c.id).padStart(2, '0')}</span>
-          <span class="text-[11px] mt-0.5">${solved ? '✅' : current ? '▶' : '·'}</span>
-          <span class="text-[9px] opacity-70 truncate w-full mt-0.5">${escapeHtml(c.title)}</span>
+          <span class="text-[11px] mt-0.5">${solved ? '✅' : current ? '▶' : locked ? '🔒' : '·'}</span>
+          <span class="text-[9px] opacity-70 truncate w-full mt-0.5">${locked ? 'Bloqueado' : escapeHtml(c.title)}</span>
         `;
         btn.addEventListener('click', () => {
-          state.currentCaseId = c.id;
-          saveState();
-          renderCurrentCase();
-          document.getElementById('casesModal').classList.add('hidden');
+          if (goToCase(c.id)) document.getElementById('casesModal').classList.add('hidden');
         });
         grid.appendChild(btn);
       });
@@ -2275,10 +2325,7 @@
       document.getElementById('casesModal').classList.add('hidden');
     });
     document.getElementById('btnJumpUnsolved').addEventListener('click', () => {
-      const next = CASES.find(c => !state.solvedCases[c.id]) || CASES[0];
-      state.currentCaseId = next.id;
-      saveState();
-      renderCurrentCase();
+      goToCase(firstUnsolvedId());
       document.getElementById('casesModal').classList.add('hidden');
     });
     document.querySelectorAll('.tier-tab-btn').forEach(btn => {
@@ -2555,25 +2602,20 @@
     });
 
     document.getElementById('btnPrevCase').addEventListener('click', () => {
-      state.currentCaseId = state.currentCaseId > 1 ? state.currentCaseId - 1 : CASES.length;
-      saveState();
-      renderCurrentCase();
-      AudioEngine.click();
+      if (state.currentCaseId <= 1) return;
+      if (goToCase(state.currentCaseId - 1)) AudioEngine.click();
     });
     document.getElementById('btnNextCaseNav').addEventListener('click', () => {
-      state.currentCaseId = state.currentCaseId < CASES.length ? state.currentCaseId + 1 : 1;
-      saveState();
-      renderCurrentCase();
-      AudioEngine.click();
+      if (state.currentCaseId >= CASES.length) return;
+      if (goToCase(state.currentCaseId + 1)) AudioEngine.click();
     });
 
     document.getElementById('btnProceedNextCase').addEventListener('click', () => {
       document.getElementById('solvedModal').classList.add('hidden');
-      // Go to the next UNSOLVED case after the current one (wrapping), or simply the next one if all are solved
-      const cur = state.currentCaseId;
-      const ordered = CASES.slice(cur).concat(CASES.slice(0, cur));
-      const next = ordered.find(x => !state.solvedCases[x.id]) || ordered[0];
-      state.currentCaseId = next.id;
+      // Go to the first unsolved case (the only playable one), or the next case if everything is solved
+      const allDone = CASES.every(x => state.solvedCases[x.id]);
+      const target = allDone ? Math.min(state.currentCaseId + 1, CASES.length) : firstUnsolvedId();
+      state.currentCaseId = target;
       saveState();
       renderCurrentCase();
       window.scrollTo({ top: 0, behavior: 'smooth' });
