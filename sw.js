@@ -1,5 +1,5 @@
 // ENIGMA.IO service worker: network-first, cache fallback for offline play.
-const CACHE = 'enigma-io-v4';
+const CACHE = 'enigma-io-v5';
 const CORE = [
   './',
   './index.html',
@@ -23,6 +23,8 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+  // Métricas (GoatCounter): sempre pela rede, nunca no cache.
+  if (/goatcounter\.com|gc\.zgo\.at/.test(e.request.url)) return;
   if (e.request.method !== 'GET') return;
   e.respondWith(
     fetch(e.request)
